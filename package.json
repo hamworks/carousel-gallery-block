@@ -1,0 +1,71 @@
+{
+	"name": "carousel-gallery-block",
+	"version": "0.1.0",
+	"description": "WordPress plugin to add carousel gallery block",
+	"author": "mel_cha",
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"scripts": {
+		"build": "wp-scripts build",
+		"format": "wp-scripts format",
+		"lint": "npm run lint-js && npm run lint-css",
+		"lint-css": "wp-scripts lint-style",
+		"lint-css:fix": "wp-scripts lint-style --fix",
+		"lint-js": "wp-scripts lint-js",
+		"lint-js:fix": "wp-scripts lint-js --fix",
+		"packages-update": "wp-scripts packages-update",
+		"plugin-zip": "wp-scripts plugin-zip",
+		"start": "wp-scripts start",
+		"env": "wp-env",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:e2e": "playwright test",
+		"test:php": "phpunit",
+		"type-check": "tsc --noEmit",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^19.8.1",
+		"@commitlint/config-conventional": "^19.8.1",
+		"@playwright/test": "^1.55.0",
+		"@testing-library/jest-dom": "^6.8.0",
+		"@testing-library/react": "^16.3.0",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/jest": "^30.0.0",
+		"@types/node": "^24.3.0",
+		"@types/wordpress__block-editor": "^11.5.17",
+		"@types/wordpress__blocks": "^12.5.18",
+		"@types/wordpress__components": "^23.8.0",
+		"@types/wordpress__element": "^2.14.1",
+		"@wordpress/e2e-test-utils-playwright": "^1.29.0",
+		"@wordpress/env": "^10.29.0",
+		"@wordpress/prettier-config": "^4.29.0",
+		"@wordpress/scripts": "^30.22.0",
+		"husky": "^9.1.7",
+		"jest": "^30.0.5",
+		"lint-staged": "^16.1.5",
+		"playwright": "^1.55.0",
+		"prettier": "npm:wp-prettier@^3.0.3",
+		"ts-jest": "^29.4.1",
+		"typescript": "^5.9.2"
+	},
+	"dependencies": {
+		"@wordpress/block-editor": "^15.2.0",
+		"@wordpress/blocks": "^15.2.0",
+		"@wordpress/components": "^30.2.0",
+		"@wordpress/compose": "^7.29.0",
+		"@wordpress/data": "^10.29.0",
+		"@wordpress/element": "^6.29.0",
+		"@wordpress/hooks": "^4.29.0",
+		"@wordpress/i18n": "^6.2.0"
+	},
+	"lint-staged": {
+		"src/**/*.{js,ts,tsx}": [
+			"npm run lint-js:fix",
+			"npm run format"
+		],
+		"src/**/*.{css,scss}": [
+			"npm run lint-css:fix"
+		]
+	}
+}
