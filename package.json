@@ -60,7 +60,8 @@
 		"@wordpress/data": "^10.29.0",
 		"@wordpress/element": "^6.29.0",
 		"@wordpress/hooks": "^4.29.0",
-		"@wordpress/i18n": "^6.2.0"
+		"@wordpress/i18n": "^6.2.0",
+		"keen-slider": "^6.8.6"
 	},
 	"lint-staged": {
 		"src/**/*.{js,ts,tsx}": [

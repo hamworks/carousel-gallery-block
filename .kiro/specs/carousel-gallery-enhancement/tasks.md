@@ -13,14 +13,14 @@
   - 依存関係の追加と設定
   - _要件: 全テスト関連要件の基盤_
 
-- [ ] 0.1 依存関係の更新
+- [x] 0.1 依存関係の更新
   - `vitest`、`@vitest/ui`パッケージの追加
   - `keen-slider`パッケージの追加（フロントエンド用）
   - 既存のJest関連設定の確認と移行準備
   - package.jsonのscriptsセクション更新
   - _要件: テスト実行環境の準備_
 
-- [ ] 0.2 Vitest設定ファイルの作成
+- [x] 0.2 Vitest設定ファイルの作成
   - `vitest.config.ts`の作成（Vite統合設定）
   - グローバルAPI有効化（`globals: true`）
   - jsdom環境設定（React Testing Library用）
@@ -28,7 +28,7 @@
   - setupFiles設定
   - _要件: 4.7（80%カバレッジ）_
 
-- [ ] 0.3 テストディレクトリ構造の作成
+- [x] 0.3 テストディレクトリ構造の作成
   - `tests/unit/`、`tests/integration/`、`tests/e2e/`、`tests/snapshots/`ディレクトリ作成
   - `tests/setup.ts`ファイル作成（@testing-library/jest-dom設定等）
   - TypeScript設定でテストファイルを認識するよう設定
