@@ -1,5 +1,8 @@
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
+import type { useSelect, useDispatch } from '@wordpress/data';
+import type * as Components from '@wordpress/components';
+import type * as BlockEditor from '@wordpress/block-editor';
 
 // WordPress i18n mock types
 interface WpI18n {
@@ -25,27 +28,38 @@ interface WpElement {
 
 // WordPress data mock types
 interface WpData {
-	useSelect: MockedFunction< () => Record< string, unknown > >;
-	useDispatch: MockedFunction< () => Record< string, unknown > >;
+	useSelect: MockedFunction< typeof useSelect >;
+	useDispatch: MockedFunction< typeof useDispatch >;
 }
 
 // WordPress global mock type
 export interface WpGlobal {
 	i18n: WpI18n;
 	element: WpElement;
-	components: Record< string, unknown >;
-	blockEditor: Record< string, unknown >;
+	components: Partial< typeof Components >;
+	blockEditor: Partial< typeof BlockEditor >;
 	data: WpData;
 }
 
 // Create typed WordPress mock
 export const createWpMock = (): WpGlobal => ( {
 	i18n: {
-		__: vi.fn( ( text: string ) => text ),
-		_x: vi.fn( ( text: string ) => text ),
+		__: vi.fn( ( text: string ) => text ) as MockedFunction<
+			( text: string, domain?: string ) => string
+		>,
+		_x: vi.fn( ( text: string ) => text ) as MockedFunction<
+			( text: string, context: string, domain?: string ) => string
+		>,
 		_n: vi.fn( ( single: string, plural: string, number: number ) =>
 			number === 1 ? single : plural
-		),
+		) as MockedFunction<
+			(
+				single: string,
+				plural: string,
+				number: number,
+				domain?: string
+			) => string
+		>,
 	},
 	element: {
 		createElement: vi.fn( () => null ),
@@ -54,8 +68,8 @@ export const createWpMock = (): WpGlobal => ( {
 	components: {},
 	blockEditor: {},
 	data: {
-		useSelect: vi.fn( () => ( {} ) ),
-		useDispatch: vi.fn( () => ( {} ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
 	},
 } );
 
