@@ -29,9 +29,9 @@
 
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
-		"types": ["node"]
+		"types": ["node", "vitest/globals", "@testing-library/jest-dom"]
 	},
-	"include": [ "src/**/*.ts", "src/**/*.tsx", "src/**/*.json", "src/**/*.js", "src/types/**/*.d.ts" ],
+	"include": [ "src/**/*.ts", "src/**/*.tsx", "src/**/*.json", "src/**/*.js", "src/types/**/*.d.ts", "tests/**/*.ts", "tests/**/*.tsx" ],
 	"exclude": [
 		"**/build/**",
 		"**/test/**",
