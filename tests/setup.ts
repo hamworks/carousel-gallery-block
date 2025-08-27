@@ -19,9 +19,10 @@ Object.defineProperty( window, 'wp', {
 HTMLCanvasElement.prototype.getContext = vi.fn( () => null );
 
 // Mock window.matchMedia for responsive components with proper types
+const matchMediaFn: Window[ 'matchMedia' ] = ( q ) => createMatchMediaMock( q );
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
-	value: vi.fn().mockImplementation( createMatchMediaMock ),
+	value: vi.fn( matchMediaFn ),
 } );
 
 // Mock IntersectionObserver with proper types
