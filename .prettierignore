@@ -3,3 +3,4 @@ build
 vendor
 package-lock.json
 .github/workflows/*
+*.md

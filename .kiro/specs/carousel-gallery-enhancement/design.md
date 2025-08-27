@@ -44,9 +44,6 @@ carousel-gallery-block/
 ### 1. 型定義の拡張 (types.ts)
 
 ```typescript
-// DefinitelyTyped提供の型定義を活用
-import type { BlockEditProps } from '@wordpress/blocks';
-
 // 最小限のメディア型（必要に応じて拡張）
 export type WpMedia = { id: number; url: string; alt?: string; caption?: string };
 
@@ -76,8 +73,6 @@ export interface ImageOrderResult {
   newImages: Image[];
   error?: string;
 }
-
-export type { BlockEditProps };
 ```
 
 ### 2. ブロック定義の拡張 (block.json)
