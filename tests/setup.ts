@@ -1,63 +1,44 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
+import { vi, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import {
+	createWpMock,
+	createMatchMediaMock,
+	createObserverMock,
+} from './mocks/wordpress';
 
-// WordPress global mock setup
+// WordPress global mock setup with proper types
 Object.defineProperty( window, 'wp', {
-	value: {
-		i18n: {
-			__: ( text: string ) => text,
-			_x: ( text: string ) => text,
-			_n: ( single: string, plural: string, number: number ) =>
-				number === 1 ? single : plural,
-		},
-		element: {
-			createElement: () => null,
-			Fragment: 'Fragment',
-		},
-		components: {},
-		blockEditor: {},
-		data: {
-			useSelect: () => ( {} ),
-			useDispatch: () => ( {} ),
-		},
-	},
+	value: createWpMock(),
 	writable: true,
+	configurable: true,
 } );
 
 // Mock HTMLCanvasElement.getContext for jsdom environment
-HTMLCanvasElement.prototype.getContext = vi.fn();
+HTMLCanvasElement.prototype.getContext =
+	vi.fn() as unknown as typeof HTMLCanvasElement.prototype.getContext;
 
-// Mock window.matchMedia for responsive components
+// Mock window.matchMedia for responsive components with proper types
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
-	value: vi.fn().mockImplementation( ( query ) => ( {
-		matches: false,
-		media: query,
-		onchange: null,
-		addListener: vi.fn(), // deprecated
-		removeListener: vi.fn(), // deprecated
-		addEventListener: vi.fn(),
-		removeEventListener: vi.fn(),
-		dispatchEvent: vi.fn(),
-	} ) ),
+	value: vi.fn().mockImplementation( createMatchMediaMock ),
 } );
 
-// Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation( () => ( {
-	observe: vi.fn(),
-	unobserve: vi.fn(),
-	disconnect: vi.fn(),
-} ) );
+// Mock IntersectionObserver with proper types
+global.IntersectionObserver = vi
+	.fn()
+	.mockImplementation(
+		createObserverMock
+	) as unknown as typeof IntersectionObserver;
 
-// Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation( () => ( {
-	observe: vi.fn(),
-	unobserve: vi.fn(),
-	disconnect: vi.fn(),
-} ) );
+// Mock ResizeObserver with proper types
+global.ResizeObserver = vi
+	.fn()
+	.mockImplementation(
+		createObserverMock
+	) as unknown as typeof ResizeObserver;
 
 // Enable auto cleanup after each test
-import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
 
 afterEach( () => {
 	cleanup();
