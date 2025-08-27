@@ -16,16 +16,7 @@ Object.defineProperty( window, 'wp', {
 } );
 
 // Mock HTMLCanvasElement.getContext for jsdom environment
-const originalGetContext = HTMLCanvasElement.prototype.getContext;
-HTMLCanvasElement.prototype.getContext = vi.fn( function (
-	this: HTMLCanvasElement,
-	contextId: string
-) {
-	if ( contextId === '2d' ) {
-		return {} as CanvasRenderingContext2D;
-	}
-	return null;
-} ) as typeof originalGetContext;
+HTMLCanvasElement.prototype.getContext = vi.fn( () => null );
 
 // Mock window.matchMedia for responsive components with proper types
 Object.defineProperty( window, 'matchMedia', {
