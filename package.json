@@ -17,8 +17,10 @@
 		"plugin-zip": "wp-scripts plugin-zip",
 		"start": "wp-scripts start",
 		"env": "wp-env",
-		"test": "jest",
-		"test:watch": "jest --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest run --coverage",
 		"test:e2e": "playwright test",
 		"test:php": "phpunit",
 		"type-check": "tsc --noEmit",
@@ -37,17 +39,18 @@
 		"@types/wordpress__blocks": "^12.5.18",
 		"@types/wordpress__components": "^23.8.0",
 		"@types/wordpress__element": "^2.14.1",
+		"@vitest/coverage-v8": "^3.2.4",
+		"@vitest/ui": "^3.2.4",
 		"@wordpress/e2e-test-utils-playwright": "^1.29.0",
 		"@wordpress/env": "^10.29.0",
 		"@wordpress/prettier-config": "^4.29.0",
 		"@wordpress/scripts": "^30.22.0",
 		"husky": "^9.1.7",
-		"jest": "^30.0.5",
 		"lint-staged": "^16.1.5",
 		"playwright": "^1.55.0",
 		"prettier": "npm:wp-prettier@^3.0.3",
-		"ts-jest": "^29.4.1",
-		"typescript": "^5.9.2"
+		"typescript": "^5.9.2",
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"@wordpress/block-editor": "^15.2.0",
@@ -57,7 +60,8 @@
 		"@wordpress/data": "^10.29.0",
 		"@wordpress/element": "^6.29.0",
 		"@wordpress/hooks": "^4.29.0",
-		"@wordpress/i18n": "^6.2.0"
+		"@wordpress/i18n": "^6.2.0",
+		"keen-slider": "^6.8.6"
 	},
 	"lint-staged": {
 		"src/**/*.{js,ts,tsx}": [

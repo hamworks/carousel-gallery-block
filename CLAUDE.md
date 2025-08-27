@@ -20,20 +20,52 @@
 - 環境変数、APIキー、認証情報などの秘匿情報はGitにコミットしない
 - 安全な管理方法を積極的に採用すること
 
-## TypeScript 型安全性ガイドライン
+## コミット規約 (Conventional Commits)
 
-- **any型・unknown型の禁止**: `any`型・`unknown`型、および`as any`の型キャストは本番・テストコードを問わず禁止。必ず適切な型定義を行う
-- **WordPress公式型の優先使用**:
-  - 独自で型定義する前に、必ずWordPress公式の型定義を確認する
-  - `@wordpress/blocks`の`Block`型、`BlockEditProps`型など公式型を優先的に使用する
-  - 独自型定義が必要な場合は、WordPressの型定義を拡張する形で行う
-- **型安全な解決策**:
-  - 型ガードを使って型を安全に絞り込む
-  - 型アサーション（`as`）は最小限に留め、型安全性を保つ
-  - ジェネリック型やユニオン型を活用する
-  - 具体的な型定義（例：`{ value: string }`）を明示する
-- **型エラーが発生した場合**:
-  - `any`・`unknown`で回避せず、根本的な型の問題を解決する
-  - テストモックでも適切な型定義を行い、型安全性を保つ
-  - null/undefinedをテストする場合は、型キャストではなく型安全な方法を使用する
-    - 例：空配列、オプショナルパラメータ、ユニオン型（`string | null`）など
+Conventional Commits に準拠すること。コミットメッセージは英語で書くこと。
+
+- フォーマット: `<type>(<scope>): <subject>`
+- 許可する type: `feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`
+- BREAKING CHANGE: `!` を type に付与、またはフッターに `BREAKING CHANGE:` を明記
+- scope 例: `ga4`, `analytics`, `provider`, `hooks`
+- subject: 簡潔な現在形/命令形で記述
+
+例:
+
+- `feat(ga4): migrate to react-ga4`
+- `fix(ga4): handle ReactGA.initialize failure on invalid id`
+- `refactor(analytics): extract GA4Provider from App`
+- `revert: "feat(ga4): migrate to react-ga4"`
+
+## 型安全性の厳守
+
+TypeScriptの型安全性を最優先に保つため、以下を徹底してください：
+
+例外(外部境界での取り扱い):
+
+- 外部入力(APIレスポンス/JSON.parse/third‑party SDK/postMessage等)は `unknown` として受け入れ、直後にスキーマ検証とナローイングを行うこと
+- スキーマ検証には Zod などのランタイムバリデーションの利用を推奨
+- アプリ内部へは検証済みの安全な型のみを通すこと
+
+### any型の禁止・unknownの限定使用
+
+- `any` および `as any` の型キャストは本番・テストを問わず禁止。
+  - `unknown` は「外部境界で受け入れて直後にスキーマ検証・ナローイングする」場合に限り一時的に許容。
+- アプリ内部へは検証済みの安全な型のみを通すこと。
+
+### テストコードでの型安全性
+
+- **関数シグネチャの確認**: テスト作成時は必ず実際の関数定義を確認し、引数の数・型・順序を正確に記述する
+- **型エラーの即座対応**: TypeScriptコンパイルエラーや型の不整合は放置せず、必ず修正する
+- **モックの型安全性**: vi.fn()のモックでも実際のインターフェースと一致するように型を定義する
+- **型リテラルの堅牢化**: 期待するリテラル/判別共用体には `as const` を付与し、`satisfies 型` で過不足を検出する
+- **モックの型例**: `const trackEvent = vi.fn<GA4Service['trackEvent']>();` のように実関数の型を参照して定義する
+
+### 型エラー防止のための手順
+
+1. 新しい関数を作成したら、その関数を使用する全てのテストで関数シグネチャを確認
+2. 関数シグネチャを変更した場合は、その関数を使用する全ての箇所を更新
+3. `npm run type-check`（= `tsc --noEmit`）で型エラーがないことを必ず確認
+4. `npm run test -- --coverage` 実行時に、カバレッジ閾値（Statements/Branches/Functions/Lines 全て>=80%）を満たすこと
+
+**重要**: (a) TypeScriptエラー、(b) テスト失敗、(c) カバレッジ閾値未達、のいずれかが存在するPRはマージ不可。CIで `type-check`/`test`/`coverage` が失敗した場合は必ず修正して再実行してください。
