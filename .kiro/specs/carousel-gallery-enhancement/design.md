@@ -123,13 +123,8 @@ export type { BlockEditProps, MediaItem };
 
 ```typescript
 import { __ } from '@wordpress/i18n';
-import {
-  useBlockProps,
-  InspectorControls,
-  PanelBody,
-  RangeControl,
-  ToggleControl
-} from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, RangeControl, ToggleControl } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
 import type { BlockAttributes } from '../types';
 
@@ -177,14 +172,9 @@ export default function Edit( props: BlockEditProps< BlockAttributes > ) {
 
 ```typescript
 import { __ } from '@wordpress/i18n';
-import {
-  MediaUpload,
-  MediaUploadCheck,
-  BaseControl
-} from '@wordpress/block-editor';
-import { Button } from '@wordpress/components';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button, BaseControl } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
-import type { MediaItem } from '@wordpress/components';
 import type { BlockAttributes, Image, ImageOrderAction } from '../types';
 import { moveImageInArray, replaceImageAtIndex, removeImageAtIndex } from '../utils/imageOrderUtils';
 

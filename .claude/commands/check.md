@@ -55,7 +55,7 @@ npm run lint-js:fix
 ## 5. 修正後の再チェック
 
 ```bash
-npm run typecheck && npm run lint-js:fix
+npm run type-check && npm run lint-js:fix
 ```
 
 ## 6. テストの実行
