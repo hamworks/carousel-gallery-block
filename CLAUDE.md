@@ -65,6 +65,7 @@ TypeScriptの型安全性を最優先に保つため、以下を徹底してく�
 
 1. 新しい関数を作成したら、その関数を使用する全てのテストで関数シグネチャを確認
 2. 関数シグネチャを変更した場合は、その関数を使用する全ての箇所を更新
-3. `npm run lint` で型エラーがないことを必ず確認
+3. `npm run type-check`（= `tsc --noEmit`）で型エラーがないことを必ず確認
+4. `npm run test -- --coverage` 実行時に、カバレッジ閾値（Statements/Branches/Functions/Lines 全て>=80%）を満たすこと
 
-**重要**: 型の不整合やTypeScriptエラーが存在するPRはマージ不可。CIで `typecheck` が失敗した場合は必ず修正して再実行してください。
+**重要**: (a) TypeScriptエラー、(b) テスト失敗、(c) カバレッジ閾値未達、のいずれかが存在するPRはマージ不可。CIで `type-check`/`test`/`coverage` が失敗した場合は必ず修正して再実行してください。
