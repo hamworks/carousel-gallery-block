@@ -108,3 +108,28 @@ export const createObserverMock = (): ObserverMock => ( {
 	unobserve: vi.fn(),
 	disconnect: vi.fn(),
 } );
+
+// Create IntersectionObserver mock with required properties
+export const createIntersectionObserverMock = (
+	_callback: IntersectionObserverCallback,
+	options?: IntersectionObserverInit
+): IntersectionObserver => {
+	const mock = createObserverMock();
+	return {
+		...mock,
+		root: options?.root || null,
+		rootMargin: options?.rootMargin || '0px',
+		thresholds: Array.isArray( options?.threshold )
+			? options.threshold
+			: [ options?.threshold || 0 ],
+		takeRecords: vi.fn( () => [] ),
+	} as IntersectionObserver;
+};
+
+// Create ResizeObserver mock with required properties
+export const createResizeObserverMock = (): ResizeObserver => {
+	const mock = createObserverMock();
+	return {
+		...mock,
+	} as ResizeObserver;
+};
