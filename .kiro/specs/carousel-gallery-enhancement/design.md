@@ -46,7 +46,9 @@ carousel-gallery-block/
 ```typescript
 // DefinitelyTyped提供の型定義を活用
 import type { BlockEditProps } from '@wordpress/blocks';
-import type { MediaItem } from '@wordpress/components';
+
+// 最小限のメディア型（必要に応じて拡張）
+export type WpMedia = { id: number; url: string; alt?: string; caption?: string };
 
 // 既存のBlockAttributesを拡張
 export interface BlockAttributes {
@@ -58,11 +60,10 @@ export interface BlockAttributes {
   templateLock?: 'all' | 'insert' | 'contentOnly' | false;
 }
 
-// DefinitelyTyped MediaItemを基にした画像型
+// WpMediaを基にした画像型
 export interface Image {
   url: string;
   id: number | undefined;
-  // MediaItemの他のプロパティも必要に応じて追加可能
   alt?: string;
   caption?: string;
 }
@@ -76,8 +77,7 @@ export interface ImageOrderResult {
   error?: string;
 }
 
-// DefinitelyTyped型を再エクスポート（利便性のため）
-export type { BlockEditProps, MediaItem };
+export type { BlockEditProps };
 ```
 
 ### 2. ブロック定義の拡張 (block.json)
@@ -212,10 +212,7 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
     updateImagesAttribute( newImages );
   };
 
-  const addNewImage = () => {
-    // MediaUploadはWordPress依存のコンポーネントなので、そのまま使用
-    // 選択後のコールバックで純粋関数を使用
-  };
+  // Add image via MediaUpload (render-prop)
 
   return (
     <MediaUploadCheck>
@@ -228,7 +225,7 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
             <div className="image-controls-wrapper">
               <MediaControl
                 media={ image }
-                onSelect={ ( media: MediaItem ) => {
+                onSelect={ ( media: WpMedia ) => {
                   selectImage( index, {
                     url: media.url,
                     id: media.id,
@@ -259,8 +256,14 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
         </div>
       ) ) }
       <Button
-        variant="primary"
-        onClick={ addNewImage }
+        className="is-primary"
+        onClick={ () => {
+          const empty = {
+            url: '',
+            id: undefined,
+          };
+          updateImagesAttribute( addImageToArray( images, empty ) );
+        } }
       >
         { __( 'Add', 'carousel-gallery-block' ) }
       </Button>
@@ -416,8 +419,13 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 // view.ts内でのエラーハンドリング
 const initializeCarousel = ( element: HTMLElement ) => {
   try {
-    const speed = element.getAttribute( 'data-speed' ) || '1';
-    const direction = element.getAttribute( 'data-direction' ) || 'ltr';
+    const speedAttr = element.getAttribute( 'data-speed' ) || '1';
+    const speed = Math.max(1, Number.parseFloat(speedAttr)) || 1;
+    const direction = element.getAttribute( 'data-direction' ) === 'rtl' ? 'rtl' : 'ltr';
+    const imagesContainer = element.querySelector('.wp-block-carousel-gallery-block__images') as HTMLElement | null;
+    if (!imagesContainer) {
+      throw new Error('Images container not found');
+    }
 
     // KeenSlider初期化
     const slider = new KeenSlider( imagesContainer, {
@@ -547,6 +555,10 @@ import save from '../../src/save';
 
 describe( 'Save component snapshots', () => {
   it( 'should render with direction attribute', () => {
+    const mockImages = [
+      { url: 'image1.jpg', id: 1 },
+      { url: 'image2.jpg', id: 2 },
+    ] as const;
     const attributes = {
       images: mockImages,
       speed: 2,
