@@ -35,3 +35,6 @@ playwright-report/
 *.zip
 
 vendor/
+
+# Claude
+.claude/settings.local.json
