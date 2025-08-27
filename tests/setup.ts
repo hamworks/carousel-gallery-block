@@ -2,7 +2,6 @@ import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import type { MockedFunction } from 'vitest';
-import type { useSelect, useDispatch } from '@wordpress/data';
 import type * as Components from '@wordpress/components';
 import type * as BlockEditor from '@wordpress/block-editor';
 
@@ -30,8 +29,8 @@ interface WpElement {
 
 // WordPress data mock types
 interface WpData {
-	useSelect: MockedFunction< typeof useSelect >;
-	useDispatch: MockedFunction< typeof useDispatch >;
+	useSelect: MockedFunction< typeof import('@wordpress/data').useSelect >;
+	useDispatch: MockedFunction< typeof import('@wordpress/data').useDispatch >;
 }
 
 // WordPress global mock type
