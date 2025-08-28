@@ -128,28 +128,32 @@ describe( 'replaceImageAtIndex', () => {
 		};
 		const result = replaceImageAtIndex( mockImages, 1, newImage );
 
-		expect( result ).toHaveLength( 3 );
-		expect( result[ 0 ] ).toEqual( mockImages[ 0 ] );
-		expect( result[ 1 ] ).toEqual( newImage );
-		expect( result[ 2 ] ).toEqual( mockImages[ 2 ] );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toHaveLength( 3 );
+		expect( result.newImages[ 0 ] ).toEqual( mockImages[ 0 ] );
+		expect( result.newImages[ 1 ] ).toEqual( newImage );
+		expect( result.newImages[ 2 ] ).toEqual( mockImages[ 2 ] );
+		expect( result.error ).toBeUndefined();
 	} );
 
 	it( '最初の画像を置き換えできる', () => {
 		const newImage: Image = { url: 'new-image.jpg', id: 99 };
 		const result = replaceImageAtIndex( mockImages, 0, newImage );
 
-		expect( result[ 0 ] ).toEqual( newImage );
-		expect( result[ 1 ] ).toEqual( mockImages[ 1 ] );
-		expect( result[ 2 ] ).toEqual( mockImages[ 2 ] );
+		expect( result.success ).toBe( true );
+		expect( result.newImages[ 0 ] ).toEqual( newImage );
+		expect( result.newImages[ 1 ] ).toEqual( mockImages[ 1 ] );
+		expect( result.newImages[ 2 ] ).toEqual( mockImages[ 2 ] );
 	} );
 
 	it( '最後の画像を置き換えできる', () => {
 		const newImage: Image = { url: 'new-image.jpg', id: 99 };
 		const result = replaceImageAtIndex( mockImages, 2, newImage );
 
-		expect( result[ 0 ] ).toEqual( mockImages[ 0 ] );
-		expect( result[ 1 ] ).toEqual( mockImages[ 1 ] );
-		expect( result[ 2 ] ).toEqual( newImage );
+		expect( result.success ).toBe( true );
+		expect( result.newImages[ 0 ] ).toEqual( mockImages[ 0 ] );
+		expect( result.newImages[ 1 ] ).toEqual( mockImages[ 1 ] );
+		expect( result.newImages[ 2 ] ).toEqual( newImage );
 	} );
 
 	it( '元の配列を変更しない', () => {
@@ -158,15 +162,16 @@ describe( 'replaceImageAtIndex', () => {
 		const result = replaceImageAtIndex( mockImages, 1, newImage );
 
 		expect( mockImages ).toEqual( originalImages );
-		expect( result ).not.toBe( mockImages );
+		expect( result.newImages ).not.toBe( mockImages );
 	} );
 
-	it( '無効なインデックスの場合は元の配列を返す', () => {
+	it( '無効なインデックスの場合はエラーを返す', () => {
 		const newImage: Image = { url: 'new-image.jpg', id: 99 };
 		const result = replaceImageAtIndex( mockImages, 5, newImage );
 
-		expect( result ).toEqual( mockImages );
-		expect( result ).toBe( mockImages );
+		expect( result.success ).toBe( false );
+		expect( result.newImages ).toEqual( mockImages );
+		expect( result.error ).toBe( 'Invalid image index' );
 	} );
 } );
 
@@ -180,39 +185,45 @@ describe( 'removeImageAtIndex', () => {
 	it( '指定した位置の画像を削除できる', () => {
 		const result = removeImageAtIndex( mockImages, 1 );
 
-		expect( result ).toHaveLength( 2 );
-		expect( result[ 0 ] ).toEqual( mockImages[ 0 ] );
-		expect( result[ 1 ] ).toEqual( mockImages[ 2 ] );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toHaveLength( 2 );
+		expect( result.newImages[ 0 ] ).toEqual( mockImages[ 0 ] );
+		expect( result.newImages[ 1 ] ).toEqual( mockImages[ 2 ] );
+		expect( result.error ).toBeUndefined();
 	} );
 
 	it( '最初の画像を削除できる', () => {
 		const result = removeImageAtIndex( mockImages, 0 );
 
-		expect( result ).toHaveLength( 2 );
-		expect( result[ 0 ] ).toEqual( mockImages[ 1 ] );
-		expect( result[ 1 ] ).toEqual( mockImages[ 2 ] );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toHaveLength( 2 );
+		expect( result.newImages[ 0 ] ).toEqual( mockImages[ 1 ] );
+		expect( result.newImages[ 1 ] ).toEqual( mockImages[ 2 ] );
 	} );
 
 	it( '最後の画像を削除できる', () => {
 		const result = removeImageAtIndex( mockImages, 2 );
 
-		expect( result ).toHaveLength( 2 );
-		expect( result[ 0 ] ).toEqual( mockImages[ 0 ] );
-		expect( result[ 1 ] ).toEqual( mockImages[ 1 ] );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toHaveLength( 2 );
+		expect( result.newImages[ 0 ] ).toEqual( mockImages[ 0 ] );
+		expect( result.newImages[ 1 ] ).toEqual( mockImages[ 1 ] );
 	} );
 
 	it( '単一画像を削除して空配列を返す', () => {
 		const singleImage: Image[] = [ { url: 'single.jpg', id: 1 } ];
 		const result = removeImageAtIndex( singleImage, 0 );
 
-		expect( result ).toEqual( [] );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toEqual( [] );
 	} );
 
-	it( '無効なインデックスの場合は元の配列を返す', () => {
+	it( '無効なインデックスの場合はエラーを返す', () => {
 		const result = removeImageAtIndex( mockImages, 5 );
 
-		expect( result ).toEqual( mockImages );
-		expect( result ).toHaveLength( 3 );
+		expect( result.success ).toBe( false );
+		expect( result.newImages ).toEqual( mockImages );
+		expect( result.error ).toBe( 'Invalid image index' );
 	} );
 
 	it( '元の配列を変更しない', () => {
@@ -220,7 +231,7 @@ describe( 'removeImageAtIndex', () => {
 		const result = removeImageAtIndex( mockImages, 1 );
 
 		expect( mockImages ).toEqual( originalImages );
-		expect( result ).not.toBe( mockImages );
+		expect( result.newImages ).not.toBe( mockImages );
 	} );
 } );
 
@@ -234,18 +245,21 @@ describe( 'addImageToArray', () => {
 		const newImage: Image = { url: 'new-image.jpg', id: 3 };
 		const result = addImageToArray( mockImages, newImage );
 
-		expect( result ).toHaveLength( 3 );
-		expect( result[ 0 ] ).toEqual( mockImages[ 0 ] );
-		expect( result[ 1 ] ).toEqual( mockImages[ 1 ] );
-		expect( result[ 2 ] ).toEqual( newImage );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toHaveLength( 3 );
+		expect( result.newImages[ 0 ] ).toEqual( mockImages[ 0 ] );
+		expect( result.newImages[ 1 ] ).toEqual( mockImages[ 1 ] );
+		expect( result.newImages[ 2 ] ).toEqual( newImage );
+		expect( result.error ).toBeUndefined();
 	} );
 
 	it( '空配列に画像を追加できる', () => {
 		const newImage: Image = { url: 'new-image.jpg', id: 1 };
 		const result = addImageToArray( [], newImage );
 
-		expect( result ).toHaveLength( 1 );
-		expect( result[ 0 ] ).toEqual( newImage );
+		expect( result.success ).toBe( true );
+		expect( result.newImages ).toHaveLength( 1 );
+		expect( result.newImages[ 0 ] ).toEqual( newImage );
 	} );
 
 	it( '元の配列を変更しない', () => {
@@ -254,6 +268,6 @@ describe( 'addImageToArray', () => {
 		const result = addImageToArray( mockImages, newImage );
 
 		expect( mockImages ).toEqual( originalImages );
-		expect( result ).not.toBe( mockImages );
+		expect( result.newImages ).not.toBe( mockImages );
 	} );
 } );
