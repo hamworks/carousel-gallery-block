@@ -26,40 +26,58 @@ const isValidIndex = ( index: number, arrayLength: number ): boolean => {
 };
 
 /**
- * @description Creates an error result for failed image operations
+ * @description Creates a result object for image operations
  * Optimized for React: reuses original array reference when operation fails
  * to prevent unnecessary re-renders in React.memo or useEffect dependencies
- * @param {ReadonlyArray<Image>} images - Original images array
- * @param {ErrorMessage}         error  - Error message
- * @return {ImageOrderResult} Error result object
+ * @param {ReadonlyArray<Image>} images  - Original or modified images array
+ * @param {boolean}              success - Whether the operation succeeded
+ * @param {ErrorMessage}         error   - Optional error message for failed operations
+ * @return {ImageOrderResult} Result object
  */
-const createErrorResult = (
+const createResult = (
 	images: readonly Image[],
-	error: ErrorMessage
+	success: boolean,
+	error?: ErrorMessage
 ): ImageOrderResult => {
-	return {
-		success: false,
-		// Reuse original array reference for React optimization
-		// Only create new array if images is not already an Image[]
-		newImages: Array.isArray( images )
-			? ( images as Image[] )
-			: [ ...images ],
-		error,
-	};
+	const newImages = Array.isArray( images )
+		? ( images as Image[] )
+		: [ ...images ];
+
+	return success
+		? { success: true, newImages }
+		: { success: false, newImages, error: error! };
 };
 
 /**
- * @description Creates a success result for successful image operations
- * @param {ReadonlyArray<Image>} newImages - Modified images array
- * @return {ImageOrderResult} Success result object
+ * @description Executes array operations safely with validation
+ * @param {ReadonlyArray<Image>} images        - Input images array
+ * @param {number}               index         - Index to validate
+ * @param {Function}             operation     - Function to execute if validation passes
+ * @param {ErrorMessage}         indexError    - Error to return if index is invalid
+ * @param {ErrorMessage}         boundaryError - Optional boundary-specific error
+ * @return {ImageOrderResult} Result of the operation
  */
-const createSuccessResult = (
-	newImages: readonly Image[]
+const executeArrayOperation = (
+	images: readonly Image[],
+	index: number,
+	operation: ( images: readonly Image[], index: number ) => readonly Image[],
+	indexError: ErrorMessage,
+	boundaryError?: ErrorMessage
 ): ImageOrderResult => {
-	return {
-		success: true,
-		newImages: [ ...newImages ],
-	};
+	if ( ! isValidIndex( index, images.length ) ) {
+		return createResult( images, false, indexError );
+	}
+
+	if ( boundaryError ) {
+		return createResult( images, false, boundaryError );
+	}
+
+	try {
+		const newImages = operation( images, index );
+		return createResult( newImages, true );
+	} catch {
+		return createResult( images, false, indexError );
+	}
 };
 
 /**
@@ -80,34 +98,32 @@ export const moveImageInArray = (
 	index: number,
 	action: ImageOrderAction
 ): ImageOrderResult => {
-	// Validate input parameters
-	if ( ! isValidIndex( index, images.length ) ) {
-		return createErrorResult( images, ERROR_MESSAGES.INVALID_INDEX );
-	}
-
-	// Check boundary conditions
+	// Check boundary conditions first
+	let boundaryError: ErrorMessage | undefined;
 	if ( action === 'moveUp' && index === 0 ) {
-		return createErrorResult( images, ERROR_MESSAGES.CANNOT_MOVE_FIRST_UP );
+		boundaryError = ERROR_MESSAGES.CANNOT_MOVE_FIRST_UP;
+	} else if ( action === 'moveDown' && index === images.length - 1 ) {
+		boundaryError = ERROR_MESSAGES.CANNOT_MOVE_LAST_DOWN;
+	} else {
+		boundaryError = undefined;
 	}
 
-	if ( action === 'moveDown' && index === images.length - 1 ) {
-		return createErrorResult(
-			images,
-			ERROR_MESSAGES.CANNOT_MOVE_LAST_DOWN
-		);
-	}
-
-	// Perform the move operation
-	const newImages = [ ...images ];
-	const targetIndex = action === 'moveUp' ? index - 1 : index + 1;
-
-	// Swap images at the two positions
-	[ newImages[ index ], newImages[ targetIndex ] ] = [
-		newImages[ targetIndex ],
-		newImages[ index ],
-	];
-
-	return createSuccessResult( newImages );
+	// Execute move operation using unified handler
+	return executeArrayOperation(
+		images,
+		index,
+		( imgs, idx ) => {
+			const newImages = [ ...imgs ];
+			const targetIndex = action === 'moveUp' ? idx - 1 : idx + 1;
+			[ newImages[ idx ], newImages[ targetIndex ] ] = [
+				newImages[ targetIndex ],
+				newImages[ idx ],
+			];
+			return newImages;
+		},
+		ERROR_MESSAGES.INVALID_INDEX,
+		boundaryError
+	);
 };
 
 /**
@@ -129,13 +145,16 @@ export const replaceImageAtIndex = (
 	index: number,
 	newImage: Image
 ): ImageOrderResult => {
-	if ( ! isValidIndex( index, images.length ) ) {
-		return createErrorResult( images, ERROR_MESSAGES.INVALID_INDEX );
-	}
-
-	const newImages = [ ...images ];
-	newImages[ index ] = newImage;
-	return createSuccessResult( newImages );
+	return executeArrayOperation(
+		images,
+		index,
+		( imgs, idx ) => {
+			const newImages = [ ...imgs ];
+			newImages[ idx ] = newImage;
+			return newImages;
+		},
+		ERROR_MESSAGES.INVALID_INDEX
+	);
 };
 
 /**
@@ -154,12 +173,12 @@ export const removeImageAtIndex = (
 	images: readonly Image[],
 	index: number
 ): ImageOrderResult => {
-	if ( ! isValidIndex( index, images.length ) ) {
-		return createErrorResult( images, ERROR_MESSAGES.INVALID_INDEX );
-	}
-
-	const newImages = images.filter( ( _, i ) => i !== index );
-	return createSuccessResult( newImages );
+	return executeArrayOperation(
+		images,
+		index,
+		( imgs, idx ) => imgs.filter( ( _, i ) => i !== idx ),
+		ERROR_MESSAGES.INVALID_INDEX
+	);
 };
 
 /**
@@ -179,8 +198,24 @@ export const addImageToArray = (
 	images: readonly Image[],
 	newImage: Image
 ): ImageOrderResult => {
-	const newImages = [ ...images, newImage ];
-	return createSuccessResult( newImages );
+	return createResult( [ ...images, newImage ], true );
+};
+
+/**
+ * @description Unified state updater factory
+ * @param operation - Operation function that returns ImageOrderResult
+ * @return State updater function for React setState
+ */
+const createStateUpdater = < T extends unknown[] >(
+	operation: ( prevImages: readonly Image[], ...args: T ) => ImageOrderResult
+) => {
+	return ( ...args: T ) =>
+		( prevImages: readonly Image[] ): Image[] => {
+			const result = operation( prevImages, ...args );
+			return result.success
+				? result.newImages
+				: ( prevImages as Image[] );
+		};
 };
 
 /**
@@ -188,66 +223,27 @@ export const addImageToArray = (
  * These functions return state updaters that work with React's setState
  * @example
  * ```typescript
- * const handleMoveUp = useCallback((index: number) => {
- *   setImages(prevImages => {
- *     const result = moveImageInArray(prevImages, index, 'moveUp');
- *     return result.success ? result.newImages : prevImages;
- *   });
- * }, []);
+ * const handleMoveUp = useCallback(imageOrderStateUpdaters.move(index, 'moveUp'), [index]);
  * ```
  */
 export const imageOrderStateUpdaters = {
 	/**
-	 * @param index
-	 * @param action
 	 * @description Create a state updater function for moving images
 	 */
-	createMoveUpdater:
-		( index: number, action: ImageOrderAction ) =>
-		( prevImages: readonly Image[] ): Image[] => {
-			const result = moveImageInArray( prevImages, index, action );
-			return result.success
-				? result.newImages
-				: ( prevImages as Image[] );
-		},
+	move: createStateUpdater( moveImageInArray ),
 
 	/**
-	 * @param index
-	 * @param newImage
 	 * @description Create a state updater function for replacing images
 	 */
-	createReplaceUpdater:
-		( index: number, newImage: Image ) =>
-		( prevImages: readonly Image[] ): Image[] => {
-			const result = replaceImageAtIndex( prevImages, index, newImage );
-			return result.success
-				? result.newImages
-				: ( prevImages as Image[] );
-		},
+	replace: createStateUpdater( replaceImageAtIndex ),
 
 	/**
-	 * @param index
 	 * @description Create a state updater function for removing images
 	 */
-	createRemoveUpdater:
-		( index: number ) =>
-		( prevImages: readonly Image[] ): Image[] => {
-			const result = removeImageAtIndex( prevImages, index );
-			return result.success
-				? result.newImages
-				: ( prevImages as Image[] );
-		},
+	remove: createStateUpdater( removeImageAtIndex ),
 
 	/**
-	 * @param newImage
 	 * @description Create a state updater function for adding images
 	 */
-	createAddUpdater:
-		( newImage: Image ) =>
-		( prevImages: readonly Image[] ): Image[] => {
-			const result = addImageToArray( prevImages, newImage );
-			return result.success
-				? result.newImages
-				: ( prevImages as Image[] );
-		},
+	add: createStateUpdater( addImageToArray ),
 } as const;

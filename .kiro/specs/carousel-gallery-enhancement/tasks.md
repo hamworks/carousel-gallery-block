@@ -34,27 +34,27 @@
   - TypeScript設定でテストファイルを認識するよう設定
   - _要件: テスト実装の基盤準備_
 
-- [ ] 1. 基盤実装とユーティリティ関数の作成（TDDアプローチ）
+- [x] 1. 基盤実装とユーティリティ関数の作成（TDDアプローチ）
   - DefinitelyTyped型定義を活用した型システムの拡張
   - 画像順序管理のための純粋関数をVitest駆動で実装
   - 各機能に対してテスト→実装のサイクルを実行
   - _要件: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 1.1 型定義の拡張とDefinitelyTyped型の統合
+- [x] 1.1 型定義の拡張とDefinitelyTyped型の統合
   - `src/types.ts`でDefinitelyTyped型定義を活用したBlockAttributes型を拡張
   - `direction`属性（'ltr' | 'rtl'）をブロック定義に追加
   - DefinitelyTyped MediaItem型を使用したImage型の定義
   - 型定義が不完全な場合は@ts-ignoreで対処（コメント必須）
   - _要件: 1.1, 1.2_
 
-- [ ] 1.2 画像順序管理ユーティリティ関数のテスト作成
+- [x] 1.2 画像順序管理ユーティリティ関数のテスト作成
   - `tests/unit/imageOrderUtils.test.ts`でWordPressに依存しない純粋関数のVitestテストを作成
   - `moveImageInArray`, `replaceImageAtIndex`, `removeImageAtIndex`関数のテストケースを実装
   - 正常系・異常系の両方をカバーするテストケースを定義
   - Vitest設定とテスト環境の整備
   - _要件: 2.2, 2.3, 2.4_
 
-- [ ] 1.3 画像順序管理ユーティリティ関数の実装
+- [x] 1.3 画像順序管理ユーティリティ関数の実装
   - `src/utils/imageOrderUtils.ts`に純粋関数として画像配列操作関数を実装
   - テストケースを満たす`moveImageInArray`, `replaceImageAtIndex`, `removeImageAtIndex`関数を作成
   - エラーハンドリングとバリデーション機能を含める

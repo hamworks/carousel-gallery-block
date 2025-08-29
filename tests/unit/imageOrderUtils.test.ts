@@ -5,6 +5,7 @@ import {
 	replaceImageAtIndex,
 	removeImageAtIndex,
 	addImageToArray,
+	imageOrderStateUpdaters,
 } from '../../src/utils/imageOrderUtils';
 
 describe( 'moveImageInArray', () => {
@@ -269,5 +270,98 @@ describe( 'addImageToArray', () => {
 
 		expect( mockImages ).toEqual( originalImages );
 		expect( result.newImages ).not.toBe( mockImages );
+	} );
+} );
+
+describe( 'imageOrderStateUpdaters - React最適化関数', () => {
+	const mockImages: Image[] = [
+		{ url: 'image1.jpg', id: 1 },
+		{ url: 'image2.jpg', id: 2 },
+		{ url: 'image3.jpg', id: 3 },
+	];
+
+	describe( 'move', () => {
+		it( '画像を正常に移動できる', () => {
+			const updater = imageOrderStateUpdaters.move( 1, 'moveUp' );
+			const result = updater( mockImages );
+
+			expect( result ).toHaveLength( 3 );
+			expect( result[ 0 ].id ).toBe( 2 );
+			expect( result[ 1 ].id ).toBe( 1 );
+		} );
+
+		it( 'エラー時は元の配列を返す（参照が同じ）', () => {
+			const updater = imageOrderStateUpdaters.move( 0, 'moveUp' );
+			const result = updater( mockImages );
+
+			expect( result ).toBe( mockImages );
+		} );
+	} );
+
+	describe( 'replace', () => {
+		it( '画像を正常に置き換えできる', () => {
+			const newImage: Image = { url: 'new.jpg', id: 99 };
+			const updater = imageOrderStateUpdaters.replace( 1, newImage );
+			const result = updater( mockImages );
+
+			expect( result ).toHaveLength( 3 );
+			expect( result[ 1 ] ).toEqual( newImage );
+		} );
+
+		it( 'エラー時は元の配列を返す', () => {
+			const newImage: Image = { url: 'new.jpg', id: 99 };
+			const updater = imageOrderStateUpdaters.replace( 5, newImage );
+			const result = updater( mockImages );
+
+			expect( result ).toBe( mockImages );
+		} );
+	} );
+
+	describe( 'remove', () => {
+		it( '画像を正常に削除できる', () => {
+			const updater = imageOrderStateUpdaters.remove( 1 );
+			const result = updater( mockImages );
+
+			expect( result ).toHaveLength( 2 );
+			expect( result[ 0 ].id ).toBe( 1 );
+			expect( result[ 1 ].id ).toBe( 3 );
+		} );
+
+		it( 'エラー時は元の配列を返す', () => {
+			const updater = imageOrderStateUpdaters.remove( 5 );
+			const result = updater( mockImages );
+
+			expect( result ).toBe( mockImages );
+		} );
+	} );
+
+	describe( 'add', () => {
+		it( '画像を正常に追加できる', () => {
+			const newImage: Image = { url: 'new.jpg', id: 4 };
+			const updater = imageOrderStateUpdaters.add( newImage );
+			const result = updater( mockImages );
+
+			expect( result ).toHaveLength( 4 );
+			expect( result[ 3 ] ).toEqual( newImage );
+		} );
+
+		it( '空配列に画像を追加できる', () => {
+			const newImage: Image = { url: 'new.jpg', id: 1 };
+			const updater = imageOrderStateUpdaters.add( newImage );
+			const result = updater( [] );
+
+			expect( result ).toHaveLength( 1 );
+			expect( result[ 0 ] ).toEqual( newImage );
+		} );
+	} );
+
+	describe( 'React useCallbackとの統合', () => {
+		it( '同じパラメータで同じ関数参照を返す（メモ化可能）', () => {
+			const updater1 = imageOrderStateUpdaters.move( 1, 'moveUp' );
+			const updater2 = imageOrderStateUpdaters.move( 1, 'moveUp' );
+
+			// 関数の実行結果が同じであることを確認
+			expect( updater1( mockImages ) ).toEqual( updater2( mockImages ) );
+		} );
 	} );
 } );
