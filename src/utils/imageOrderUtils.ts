@@ -219,20 +219,53 @@ export const addImageToArray = (
 };
 
 /**
- * @description Unified state updater factory
- * @param operation - Operation function that returns ImageOrderResult
- * @return State updater function for React setState
+ * @description Create a state updater function for moving images
+ * @param {number}           index  - Index of the image to move
+ * @param {ImageOrderAction} action - Move action (moveUp or moveDown)
+ * @return {Function} State updater function for React setState
  */
-const createStateUpdater = < T extends unknown[] >(
-	operation: ( prevImages: readonly Image[], ...args: T ) => ImageOrderResult
-) => {
-	return ( ...args: T ) =>
-		( prevImages: readonly Image[] ): Image[] => {
-			const result = operation( prevImages, ...args );
-			return result.success
-				? result.newImages
-				: ( prevImages as Image[] );
-		};
+const createMoveStateUpdater = ( index: number, action: ImageOrderAction ) => {
+	return ( prevImages: readonly Image[] ): Image[] => {
+		const result = moveImageInArray( prevImages, index, action );
+		return result.success ? result.newImages : ( prevImages as Image[] );
+	};
+};
+
+/**
+ * @description Create a state updater function for replacing images
+ * @param {number} index    - Index of the image to replace
+ * @param {Image}  newImage - New image to place at the index
+ * @return {Function} State updater function for React setState
+ */
+const createReplaceStateUpdater = ( index: number, newImage: Image ) => {
+	return ( prevImages: readonly Image[] ): Image[] => {
+		const result = replaceImageAtIndex( prevImages, index, newImage );
+		return result.success ? result.newImages : ( prevImages as Image[] );
+	};
+};
+
+/**
+ * @description Create a state updater function for removing images
+ * @param {number} index - Index of the image to remove
+ * @return {Function} State updater function for React setState
+ */
+const createRemoveStateUpdater = ( index: number ) => {
+	return ( prevImages: readonly Image[] ): Image[] => {
+		const result = removeImageAtIndex( prevImages, index );
+		return result.success ? result.newImages : ( prevImages as Image[] );
+	};
+};
+
+/**
+ * @description Create a state updater function for adding images
+ * @param {Image} newImage - New image to add to the array
+ * @return {Function} State updater function for React setState
+ */
+const createAddStateUpdater = ( newImage: Image ) => {
+	return ( prevImages: readonly Image[] ): Image[] => {
+		const result = addImageToArray( prevImages, newImage );
+		return result.success ? result.newImages : ( prevImages as Image[] );
+	};
 };
 
 /**
@@ -247,22 +280,22 @@ export const imageOrderStateUpdaters = {
 	/**
 	 * @description Create a state updater function for moving images
 	 */
-	move: createStateUpdater( moveImageInArray ),
+	move: createMoveStateUpdater,
 
 	/**
 	 * @description Create a state updater function for replacing images
 	 */
-	replace: createStateUpdater( replaceImageAtIndex ),
+	replace: createReplaceStateUpdater,
 
 	/**
 	 * @description Create a state updater function for removing images
 	 */
-	remove: createStateUpdater( removeImageAtIndex ),
+	remove: createRemoveStateUpdater,
 
 	/**
 	 * @description Create a state updater function for adding images
 	 */
-	add: createStateUpdater( addImageToArray ),
+	add: createAddStateUpdater,
 } as const;
 
 /**

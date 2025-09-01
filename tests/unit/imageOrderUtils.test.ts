@@ -359,12 +359,78 @@ describe( 'imageOrderStateUpdaters - React最適化関数', () => {
 		} );
 	} );
 
+	describe( '型安全性の検証', () => {
+		it( 'move: 正しい型の引数のみ受け入れる', () => {
+			// 正常なケース
+			expect( () =>
+				imageOrderStateUpdaters.move( 1, 'moveUp' )
+			).not.toThrow();
+			expect( () =>
+				imageOrderStateUpdaters.move( 0, 'moveDown' )
+			).not.toThrow();
+
+			// TypeScriptコンパイル時にエラーになることを確認
+			// Note: これらは実際にはコンパイルエラーで実行されない
+			// imageOrderStateUpdaters.move(1, 'invalid'); // TS Error: 無効な action 型
+			// imageOrderStateUpdaters.move('invalid', 'moveUp'); // TS Error: 無効な index 型
+		} );
+
+		it( 'replace: 正しい型の引数のみ受け入れる', () => {
+			const validImage: Image = { url: 'test.jpg', id: 1 };
+
+			// 正常なケース
+			expect( () =>
+				imageOrderStateUpdaters.replace( 1, validImage )
+			).not.toThrow();
+
+			// imageOrderStateUpdaters.replace(1, 'not-an-image'); // TS Error: 無効な newImage 型
+			// imageOrderStateUpdaters.replace('invalid', validImage); // TS Error: 無効な index 型
+		} );
+
+		it( 'remove: 正しい型の引数のみ受け入れる', () => {
+			// 正常なケース
+			expect( () => imageOrderStateUpdaters.remove( 1 ) ).not.toThrow();
+
+			// imageOrderStateUpdaters.remove('invalid'); // TS Error: 無効な index 型
+		} );
+
+		it( 'add: 正しい型の引数のみ受け入れる', () => {
+			const validImage: Image = { url: 'test.jpg', id: 1 };
+
+			// 正常なケース
+			expect( () =>
+				imageOrderStateUpdaters.add( validImage )
+			).not.toThrow();
+
+			// imageOrderStateUpdaters.add('not-an-image'); // TS Error: 無効な newImage 型
+		} );
+	} );
+
 	describe( 'React useCallbackとの統合', () => {
-		it( '同じパラメータで同じ関数参照を返す（メモ化可能）', () => {
+		it( '同じパラメータで一貫した動作を返す', () => {
+			// 個別ファクトリは毎回新しい関数インスタンスを作成するが、
+			// 同じ引数に対しては同じ結果を返すことを確認
 			const updater1 = imageOrderStateUpdaters.move( 1, 'moveUp' );
 			const updater2 = imageOrderStateUpdaters.move( 1, 'moveUp' );
 
 			// 関数の実行結果が同じであることを確認
+			expect( updater1( mockImages ) ).toEqual( updater2( mockImages ) );
+
+			// ただし、関数インスタンス自体は異なることを確認
+			expect( updater1 ).not.toBe( updater2 );
+		} );
+
+		it( 'useCallback使用時の推奨パターンをテスト', () => {
+			// useCallbackで使用する際の推奨パターン
+			const index = 1;
+			const action = 'moveUp' as const;
+
+			// 同じ引数なら同じ動作
+			const createUpdater = () =>
+				imageOrderStateUpdaters.move( index, action );
+			const updater1 = createUpdater();
+			const updater2 = createUpdater();
+
 			expect( updater1( mockImages ) ).toEqual( updater2( mockImages ) );
 		} );
 	} );
