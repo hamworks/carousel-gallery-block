@@ -17,8 +17,8 @@ interface WpI18n {
 
 // WordPress element mock types
 interface WpElement {
-	createElement: MockedFunction< typeof Element.createElement >;
-	Fragment: typeof Element.Fragment;
+	createElement: MockedFunction< () => null >;
+	Fragment: string;
 }
 
 // WordPress data mock types
@@ -31,8 +31,23 @@ interface WpData {
 interface WpGlobal {
 	i18n: WpI18n;
 	element: WpElement;
-	components: Partial< typeof Components >;
-	blockEditor: Partial< typeof BlockEditor >;
+	components: Pick<
+		typeof Components,
+		| 'Button'
+		| 'Panel'
+		| 'PanelBody'
+		| 'PanelRow'
+		| 'RangeControl'
+		| 'ToggleControl'
+		| 'SelectControl'
+	>;
+	blockEditor: Pick<
+		typeof BlockEditor,
+		| 'InspectorControls'
+		| 'MediaUpload'
+		| 'MediaPlaceholder'
+		| 'useBlockProps'
+	>;
 	data: WpData;
 }
 

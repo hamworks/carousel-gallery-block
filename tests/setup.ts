@@ -28,8 +28,21 @@ Object.defineProperty( window, 'wp', {
 			createElement: vi.fn( () => null ) as MockedFunction< () => null >,
 			Fragment: 'Fragment',
 		},
-		components: {},
-		blockEditor: {},
+		components: {
+			Button: vi.fn( () => null ),
+			Panel: vi.fn( () => null ),
+			PanelBody: vi.fn( () => null ),
+			PanelRow: vi.fn( () => null ),
+			RangeControl: vi.fn( () => null ),
+			ToggleControl: vi.fn( () => null ),
+			SelectControl: vi.fn( () => null ),
+		},
+		blockEditor: {
+			InspectorControls: vi.fn( () => null ),
+			MediaUpload: vi.fn( () => null ),
+			MediaPlaceholder: vi.fn( () => null ),
+			useBlockProps: vi.fn( () => ( {} ) ),
+		},
 		data: {
 			useSelect: vi.fn() as MockedFunction<
 				typeof import('@wordpress/data').useSelect
