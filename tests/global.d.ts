@@ -17,8 +17,8 @@ interface WpI18n {
 
 // WordPress element mock types
 interface WpElement {
-	createElement: MockedFunction< () => null >;
-	Fragment: string;
+	createElement: MockedFunction< typeof Element.createElement >;
+	Fragment: typeof Element.Fragment;
 }
 
 // WordPress data mock types

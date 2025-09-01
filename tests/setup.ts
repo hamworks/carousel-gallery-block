@@ -25,8 +25,11 @@ Object.defineProperty( window, 'wp', {
 			>,
 		},
 		element: {
-			createElement: vi.fn( () => null ) as MockedFunction< () => null >,
-			Fragment: 'Fragment',
+			createElement: vi.fn() as MockedFunction<
+				typeof import('@wordpress/element').createElement
+			>,
+			Fragment:
+				'Fragment' as unknown as typeof import('@wordpress/element').Fragment,
 		},
 		components: {
 			Button: vi.fn( () => null ),
