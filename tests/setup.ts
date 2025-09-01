@@ -1,48 +1,10 @@
 import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { Fragment as WpFragment } from '@wordpress/element';
 import type { MockedFunction } from 'vitest';
-import type * as Components from '@wordpress/components';
-import type * as BlockEditor from '@wordpress/block-editor';
 
-// WordPress i18n mock types
-interface WpI18n {
-	__: MockedFunction< ( text: string, domain?: string ) => string >;
-	_x: MockedFunction<
-		( text: string, context: string, domain?: string ) => string
-	>;
-	_n: MockedFunction<
-		(
-			single: string,
-			plural: string,
-			number: number,
-			domain?: string
-		) => string
-	>;
-}
-
-// WordPress element mock types
-interface WpElement {
-	createElement: MockedFunction< () => null >;
-	Fragment: string;
-}
-
-// WordPress data mock types
-interface WpData {
-	useSelect: MockedFunction< typeof import('@wordpress/data').useSelect >;
-	useDispatch: MockedFunction< typeof import('@wordpress/data').useDispatch >;
-}
-
-// WordPress global mock type
-interface WpGlobal {
-	i18n: WpI18n;
-	element: WpElement;
-	components: Partial< typeof Components >;
-	blockEditor: Partial< typeof BlockEditor >;
-	data: WpData;
-}
-
-// WordPress global mock setup with proper types
+// WordPress global mock setup
 Object.defineProperty( window, 'wp', {
 	value: {
 		i18n: {
@@ -64,16 +26,34 @@ Object.defineProperty( window, 'wp', {
 			>,
 		},
 		element: {
-			createElement: vi.fn( () => null ),
-			Fragment: 'Fragment',
+			createElement:
+				vi.fn< typeof import('@wordpress/element').createElement >(),
+			Fragment: WpFragment,
 		},
-		components: {},
-		blockEditor: {},
+		components: {
+			Button: vi.fn( () => null ),
+			Panel: vi.fn( () => null ),
+			PanelBody: vi.fn( () => null ),
+			PanelRow: vi.fn( () => null ),
+			RangeControl: vi.fn( () => null ),
+			ToggleControl: vi.fn( () => null ),
+			SelectControl: vi.fn( () => null ),
+		},
+		blockEditor: {
+			InspectorControls: vi.fn( () => null ),
+			MediaUpload: vi.fn( () => null ),
+			MediaPlaceholder: vi.fn( () => null ),
+			useBlockProps: vi.fn( () => ( {} ) ),
+		},
 		data: {
-			useSelect: vi.fn(),
-			useDispatch: vi.fn(),
+			useSelect: vi.fn() as MockedFunction<
+				typeof import('@wordpress/data').useSelect
+			>,
+			useDispatch: vi.fn() as MockedFunction<
+				typeof import('@wordpress/data').useDispatch
+			>,
 		},
-	} as WpGlobal,
+	},
 	writable: true,
 	configurable: true,
 } );
