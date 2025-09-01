@@ -44,6 +44,7 @@ export type Image = {
 	id: number | undefined;
 	alt?: string;
 	caption?: string;
+	clientId?: string;
 };
 
 /**
@@ -59,8 +60,11 @@ export type ImageLike = {
 };
 
 export interface Media {
-	id: number | undefined;
-	[ key: string ]: any;
+	id: number;
+	url: string;
+	alt?: string;
+	caption?: string;
+	title?: string;
 }
 
 /**

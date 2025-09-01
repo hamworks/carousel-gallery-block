@@ -344,6 +344,49 @@ export const createBlockAttributeUpdaters = < T extends string >(
 };
 
 /**
+ * @description Type guard to validate WordPress Media object from external sources
+ * Ensures type safety when receiving media objects from Gutenberg MediaUpload
+ * @param {unknown} obj - Unknown object to validate
+ * @return {boolean} True if object is a valid WpMedia
+ */
+export const isValidWpMedia = ( obj: unknown ): obj is WpMedia => {
+	if ( obj === null || typeof obj !== 'object' ) {
+		return false;
+	}
+
+	const media = obj as Record< string, unknown >;
+
+	// Check required fields
+	if ( typeof media.id !== 'number' || typeof media.url !== 'string' ) {
+		return false;
+	}
+
+	// Validate URL is not empty
+	if ( media.url.length === 0 ) {
+		return false;
+	}
+
+	// Check optional fields have correct types if present
+	if ( media.alt !== undefined && typeof media.alt !== 'string' ) {
+		return false;
+	}
+
+	if ( media.caption !== undefined && typeof media.caption !== 'string' ) {
+		return false;
+	}
+
+	if ( media.title !== undefined && typeof media.title !== 'string' ) {
+		return false;
+	}
+
+	if ( media.link !== undefined && typeof media.link !== 'string' ) {
+		return false;
+	}
+
+	return true;
+};
+
+/**
  * @description Type guard to check if an object is ImageLike
  * @param {unknown} obj - Object to check
  * @return {boolean} True if object is ImageLike
@@ -430,30 +473,43 @@ export const validateImagesAttribute = ( images: unknown ): Image[] => {
 };
 
 /**
- * @description Convert WordPress media object to Image type
- * Integrates with WordPress Media Library selection
- * @param {WpMedia} media - WordPress media object from Media Library
+ * @description Convert WordPress media object to Image type with validation
+ * Integrates with WordPress Media Library selection with type safety
+ * @param {unknown} media - Unknown media object from external source (e.g., Gutenberg MediaUpload)
  * @return {Image} Converted image object
+ * @throws {Error} If media object is invalid
  * @example
  * ```typescript
- * const onSelectMedia = (media: WpMedia) => {
+ * const onSelectMedia = (media: unknown) => {
  *   const image = wpMediaToImage(media);
  *   addImage(image);
  * };
  * ```
  */
-export const wpMediaToImage = ( media: WpMedia ): Image => ( {
-	id: media.id,
-	url: media.url,
-	alt: media.alt || '',
-	caption: media.caption || '',
-} );
+export const wpMediaToImage = ( media: unknown ): Image => {
+	if ( ! isValidWpMedia( media ) ) {
+		throw new Error( 'Invalid WordPress media object' );
+	}
+
+	return {
+		id: media.id,
+		url: media.url,
+		alt: media.alt || '',
+		caption: media.caption || '',
+	};
+};
 
 /**
- * @description Convert multiple WordPress media objects to Image array
- * @param {WpMedia[]} mediaArray - Array of WordPress media objects
- * @return {Image[]} Array of converted image objects
+ * @description Convert multiple WordPress media objects to Image array with validation
+ * @param {unknown} mediaArray - Unknown value that may be an array of media objects from external source
+ * @return {Image[]} Array of converted image objects (invalid items are filtered out)
  */
-export const wpMediaArrayToImages = ( mediaArray: WpMedia[] ): Image[] => {
-	return mediaArray.map( wpMediaToImage );
+export const wpMediaArrayToImages = ( mediaArray: unknown ): Image[] => {
+	if ( ! Array.isArray( mediaArray ) ) {
+		return [];
+	}
+
+	return ( mediaArray as unknown[] )
+		.filter( isValidWpMedia )
+		.map( ( media ) => wpMediaToImage( media ) );
 };
