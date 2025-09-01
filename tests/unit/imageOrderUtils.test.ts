@@ -437,63 +437,164 @@ describe( 'imageOrderStateUpdaters - React最適化関数', () => {
 } );
 
 describe( 'createBlockAttributeUpdaters', () => {
+	const mockImages: Image[] = [
+		{ url: 'image1.jpg', id: 1 },
+		{ url: 'image2.jpg', id: 2 },
+		{ url: 'image3.jpg', id: 3 },
+	];
+
 	it( 'setAttributesと統合して画像を移動できる', () => {
 		const setAttributes = vi.fn();
-		const helpers = createBlockAttributeUpdaters( setAttributes );
+		const getImages = vi.fn().mockReturnValue( mockImages );
+		const helpers = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'images' as const
+		);
 
 		helpers.moveImage( 1, 'moveUp' );
 
+		expect( getImages ).toHaveBeenCalled();
 		expect( setAttributes ).toHaveBeenCalledWith( {
-			images: expect.any( Function ),
+			images: [
+				{ url: 'image2.jpg', id: 2 },
+				{ url: 'image1.jpg', id: 1 },
+				{ url: 'image3.jpg', id: 3 },
+			],
 		} );
 	} );
 
 	it( 'setAttributesと統合して画像を置き換えできる', () => {
 		const setAttributes = vi.fn();
-		const helpers = createBlockAttributeUpdaters( setAttributes );
+		const getImages = vi.fn().mockReturnValue( mockImages );
+		const helpers = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'images' as const
+		);
 		const newImage: Image = { url: 'new.jpg', id: 99 };
 
 		helpers.replaceImage( 1, newImage );
 
+		expect( getImages ).toHaveBeenCalled();
 		expect( setAttributes ).toHaveBeenCalledWith( {
-			images: expect.any( Function ),
+			images: [
+				{ url: 'image1.jpg', id: 1 },
+				{ url: 'new.jpg', id: 99 },
+				{ url: 'image3.jpg', id: 3 },
+			],
 		} );
 	} );
 
 	it( 'setAttributesと統合して画像を削除できる', () => {
 		const setAttributes = vi.fn();
-		const helpers = createBlockAttributeUpdaters( setAttributes );
+		const getImages = vi.fn().mockReturnValue( mockImages );
+		const helpers = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'images' as const
+		);
 
 		helpers.removeImage( 1 );
 
+		expect( getImages ).toHaveBeenCalled();
 		expect( setAttributes ).toHaveBeenCalledWith( {
-			images: expect.any( Function ),
+			images: [
+				{ url: 'image1.jpg', id: 1 },
+				{ url: 'image3.jpg', id: 3 },
+			],
 		} );
 	} );
 
 	it( 'setAttributesと統合して画像を追加できる', () => {
 		const setAttributes = vi.fn();
-		const helpers = createBlockAttributeUpdaters( setAttributes );
+		const getImages = vi.fn().mockReturnValue( mockImages );
+		const helpers = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'images' as const
+		);
 		const newImage: Image = { url: 'new.jpg', id: 4 };
 
 		helpers.addImage( newImage );
 
+		expect( getImages ).toHaveBeenCalled();
 		expect( setAttributes ).toHaveBeenCalledWith( {
-			images: expect.any( Function ),
+			images: [
+				{ url: 'image1.jpg', id: 1 },
+				{ url: 'image2.jpg', id: 2 },
+				{ url: 'image3.jpg', id: 3 },
+				{ url: 'new.jpg', id: 4 },
+			],
 		} );
 	} );
 
 	it( 'カスタム属性名を指定できる', () => {
 		const setAttributes = vi.fn();
+		const getImages = vi.fn().mockReturnValue( mockImages );
 		const helpers = createBlockAttributeUpdaters(
 			setAttributes,
-			'gallery'
+			getImages,
+			'gallery' as const
 		);
 
 		helpers.moveImage( 0, 'moveDown' );
 
+		expect( getImages ).toHaveBeenCalled();
 		expect( setAttributes ).toHaveBeenCalledWith( {
-			gallery: expect.any( Function ),
+			gallery: [
+				{ url: 'image2.jpg', id: 2 },
+				{ url: 'image1.jpg', id: 1 },
+				{ url: 'image3.jpg', id: 3 },
+			],
+		} );
+	} );
+
+	it( '操作エラー時は元の配列を返す', () => {
+		const setAttributes = vi.fn();
+		const getImages = vi.fn().mockReturnValue( mockImages );
+		const helpers = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'images' as const
+		);
+
+		// 最初の画像を上に移動しようとする（エラーケース）
+		helpers.moveImage( 0, 'moveUp' );
+
+		expect( getImages ).toHaveBeenCalled();
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			images: mockImages,
+		} );
+	} );
+
+	it( '型安全性：正しい属性名の型が強制される', () => {
+		const setAttributes = vi.fn();
+		const getImages = vi.fn().mockReturnValue( mockImages );
+
+		// 型安全な使用例
+		const helpers1 = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'images' as const
+		);
+		const helpers2 = createBlockAttributeUpdaters(
+			setAttributes,
+			getImages,
+			'gallery' as const
+		);
+
+		helpers1.moveImage( 0, 'moveDown' );
+		helpers2.moveImage( 0, 'moveDown' );
+
+		// 最初の呼び出しは 'images' 属性を設定
+		expect( setAttributes ).toHaveBeenNthCalledWith( 1, {
+			images: expect.any( Array ),
+		} );
+
+		// 2番目の呼び出しは 'gallery' 属性を設定
+		expect( setAttributes ).toHaveBeenNthCalledWith( 2, {
+			gallery: expect.any( Array ),
 		} );
 	} );
 } );

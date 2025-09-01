@@ -302,24 +302,32 @@ export const imageOrderStateUpdaters = {
  * @description WordPress Block attributes integration helper
  * Creates updater functions that work with WordPress block's setAttributes
  * @param {Function} setAttributes - Block's setAttributes function
+ * @param {Function} getImages     - Function to retrieve current images array
  * @param {string}   attributeName - Name of the attribute containing images array
  * @return Object with WordPress-integrated image manipulation methods
  * @example
  * ```typescript
- * const imageHelpers = createBlockAttributeUpdaters(setAttributes, 'images');
+ * const imageHelpers = createBlockAttributeUpdaters(
+ *   setAttributes,
+ *   () => attributes.images,
+ *   'images'
+ * );
  * imageHelpers.moveImage(0, 'moveDown');
  * ```
  */
-export const createBlockAttributeUpdaters = (
-	setAttributes: ( attrs: Record< string, unknown > ) => void,
-	attributeName = 'images'
+export const createBlockAttributeUpdaters = < T extends string >(
+	setAttributes: ( attrs: Partial< Record< T, Image[] > > ) => void,
+	getImages: () => readonly Image[],
+	attributeName: T
 ) => {
 	const updateImages = (
 		operation: ( images: readonly Image[] ) => Image[]
 	) => {
+		const currentImages = getImages();
+		const newImages = operation( currentImages );
 		setAttributes( {
-			[ attributeName ]: operation,
-		} );
+			[ attributeName ]: newImages,
+		} as Partial< Record< T, Image[] > > );
 	};
 
 	return {
