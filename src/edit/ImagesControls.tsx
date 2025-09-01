@@ -17,7 +17,7 @@ import {
 	wpMediaToImage,
 } from '../utils/imageOrderUtils';
 import MediaControl from './MediaControl';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 type Props = {
 	images: Image[];
@@ -58,7 +58,11 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 				<div key={ image.id || `temp-${ index }` } className="my-4">
 					<BaseControl
 						id={ `image-${ index }` }
-						label={ `Image ${ index + 1 }` }
+						label={ sprintf(
+							// translators: %d: Image position number (e.g., 1, 2, 3)
+							__( 'Image %d', 'carousel-gallery-block' ),
+							index + 1
+						) }
 					>
 						<div className="my-4">
 							<MediaControl
@@ -112,7 +116,7 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 			) ) }
 
 			<Button
-				className="is-primary"
+				variant="primary"
 				onClick={ () => {
 					const result = addImageToArray( images, EMPTY_IMAGE );
 					if ( result.success ) {
