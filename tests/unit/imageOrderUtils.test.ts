@@ -932,9 +932,9 @@ describe( 'wpMediaArrayToImages', () => {
 	} );
 
 	it( '配列でない値を渡された場合は空配列を返す', () => {
-		expect( wpMediaArrayToImages( null as any ) ).toEqual( [] );
-		expect( wpMediaArrayToImages( undefined as any ) ).toEqual( [] );
-		expect( wpMediaArrayToImages( 'string' as any ) ).toEqual( [] );
-		expect( wpMediaArrayToImages( {} as any ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( null ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( undefined ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( 'string' ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( {} ) ).toEqual( [] );
 	} );
 } );

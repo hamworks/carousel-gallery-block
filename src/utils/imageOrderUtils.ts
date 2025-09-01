@@ -501,15 +501,15 @@ export const wpMediaToImage = ( media: unknown ): Image => {
 
 /**
  * @description Convert multiple WordPress media objects to Image array with validation
- * @param {unknown[]} mediaArray - Array of unknown media objects from external source
+ * @param {unknown} mediaArray - Unknown value that may be an array of media objects from external source
  * @return {Image[]} Array of converted image objects (invalid items are filtered out)
  */
-export const wpMediaArrayToImages = ( mediaArray: unknown[] ): Image[] => {
+export const wpMediaArrayToImages = ( mediaArray: unknown ): Image[] => {
 	if ( ! Array.isArray( mediaArray ) ) {
 		return [];
 	}
 
-	return mediaArray
+	return ( mediaArray as unknown[] )
 		.filter( isValidWpMedia )
 		.map( ( media ) => wpMediaToImage( media ) );
 };
