@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "hamworks/carousel-gallery-block",
+	"version": "0.1.0",
+	"title": "Carousel Gallery Block",
+	"category": "design",
+	"icon": "format-gallery",
+	"description": "A customizable carousel gallery block for displaying images with direction control and speed settings.",
+	"supports": {
+		"anchor": true,
+		"html": false,
+		"spacing": {
+			"padding": true,
+			"margin": [ "top", "bottom" ]
+		},
+		"align": [ "wide", "full" ]
+	},
+	"attributes": {
+		"speed": {
+			"type": "number",
+			"default": 1
+		},
+		"direction": {
+			"type": "string",
+			"default": "ltr",
+			"enum": ["ltr", "rtl"]
+		},
+		"images": {
+			"type": "array",
+			"source": "query",
+			"selector": ".wp-block-hamworks-carousel-gallery-block__image img",
+			"query": {
+				"id": {
+					"type": "number",
+					"source": "attribute",
+					"attribute": "data-id"
+				},
+				"url": {
+					"default": "",
+					"type": "string",
+					"source": "attribute",
+					"attribute": "src"
+				}
+			},
+			"default": []
+		}
+	},
+	"textdomain": "carousel-gallery-block",
+	"editorStyle": "file:./index.css",
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js"
+}
