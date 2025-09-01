@@ -24,10 +24,11 @@ type Props = {
 	setAttributes: ( attributes: Partial< BlockAttributes > ) => void;
 };
 
-const EMPTY_IMAGE: Image = {
+const createEmptyImage = (): Image => ( {
 	url: '',
 	id: undefined,
-} as const;
+	clientId: crypto.randomUUID(),
+} );
 
 const ImagesControls = ( { images, setAttributes }: Props ) => {
 	const selectImage = ( index: number, props: Image ) => {
@@ -55,7 +56,10 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 	return (
 		<MediaUploadCheck>
 			{ images.map( ( image, index ) => (
-				<div key={ image.id || `temp-${ index }` } className="my-4">
+				<div
+					key={ image.clientId ?? String( image.id ?? index ) }
+					className="my-4"
+				>
 					<BaseControl
 						id={ `image-${ index }` }
 						label={ sprintf(
@@ -118,7 +122,10 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 			<Button
 				variant="primary"
 				onClick={ () => {
-					const result = addImageToArray( images, EMPTY_IMAGE );
+					const result = addImageToArray(
+						images,
+						createEmptyImage()
+					);
 					if ( result.success ) {
 						setAttributes( { images: result.newImages } );
 					}

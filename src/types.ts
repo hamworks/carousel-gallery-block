@@ -44,6 +44,7 @@ export type Image = {
 	id: number | undefined;
 	alt?: string;
 	caption?: string;
+	clientId?: string;
 };
 
 /**
