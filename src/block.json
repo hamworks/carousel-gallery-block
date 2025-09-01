@@ -29,7 +29,7 @@
 		"images": {
 			"type": "array",
 			"source": "query",
-			"selector": ".wp-block-carousel-gallery-block__image img",
+			"selector": ".wp-block-hamworks-carousel-gallery-block__image img",
 			"query": {
 				"id": {
 					"type": "number",
