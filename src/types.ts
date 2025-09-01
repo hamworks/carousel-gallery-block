@@ -46,6 +46,18 @@ export type Image = {
 	caption?: string;
 };
 
+/**
+ * @description Intermediate type for validating external image data
+ * Used for type-safe validation and normalization of incoming image data
+ */
+export type ImageLike = {
+	url: unknown;
+	id?: unknown;
+	alt?: unknown;
+	caption?: unknown;
+	[ key: string ]: unknown;
+};
+
 export interface Media {
 	id: number | undefined;
 	[ key: string ]: any;

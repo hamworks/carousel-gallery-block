@@ -1,5 +1,6 @@
 import type {
 	Image,
+	ImageLike,
 	ImageOrderAction,
 	ImageOrderResult,
 	WpMedia,
@@ -343,6 +344,71 @@ export const createBlockAttributeUpdaters = < T extends string >(
 };
 
 /**
+ * @description Type guard to check if an object is ImageLike
+ * @param {unknown} obj - Object to check
+ * @return {boolean} True if object is ImageLike
+ */
+const isImageLike = ( obj: unknown ): obj is ImageLike => {
+	return obj !== null && typeof obj === 'object' && 'url' in obj;
+};
+
+/**
+ * @description Type guard to check if ImageLike has valid URL
+ * @param {ImageLike} imageLike - ImageLike object to validate
+ * @return {boolean} True if URL is valid string
+ */
+const hasValidUrl = ( imageLike: ImageLike ): boolean => {
+	return typeof imageLike.url === 'string' && imageLike.url.length > 0;
+};
+
+/**
+ * @description Safely normalize id field from ImageLike to Image format
+ * @param {ImageLike} imageLike - ImageLike object with id to normalize
+ * @return {number | undefined} Normalized id value
+ */
+const normalizeId = ( imageLike: ImageLike ): number | undefined => {
+	const { id } = imageLike;
+
+	if ( id === undefined || id === null ) {
+		return undefined;
+	}
+
+	if ( typeof id === 'number' ) {
+		return id;
+	}
+
+	if ( typeof id === 'string' ) {
+		const parsedId = parseInt( id, 10 );
+		return Number.isNaN( parsedId ) ? undefined : parsedId;
+	}
+
+	return undefined;
+};
+
+/**
+ * @description Safely normalize optional string fields
+ * @param {unknown} value - Value to normalize
+ * @return {string | undefined} Normalized string value
+ */
+const normalizeOptionalString = ( value: unknown ): string | undefined => {
+	return typeof value === 'string' ? value : undefined;
+};
+
+/**
+ * @description Converts validated ImageLike to Image
+ * @param {ImageLike} imageLike - Validated ImageLike object
+ * @return {Image} Converted Image object
+ */
+const imagelikeToImage = ( imageLike: ImageLike ): Image => {
+	return {
+		url: imageLike.url as string, // Safe cast due to hasValidUrl check
+		id: normalizeId( imageLike ),
+		alt: normalizeOptionalString( imageLike.alt ),
+		caption: normalizeOptionalString( imageLike.caption ),
+	};
+};
+
+/**
  * @description Validates images array for WordPress block attributes
  * Ensures type safety when receiving images from block attributes
  * @param {unknown} images - Raw images data from block attributes
@@ -358,28 +424,9 @@ export const validateImagesAttribute = ( images: unknown ): Image[] => {
 	}
 
 	return images
-		.filter( ( image ): image is Image => {
-			return (
-				image &&
-				typeof image === 'object' &&
-				'url' in image &&
-				typeof image.url === 'string' &&
-				( ! ( 'id' in image ) ||
-					typeof image.id === 'number' ||
-					typeof image.id === 'string' )
-			);
-		} )
-		.map( ( image ) => {
-			// Normalize string id to number, or set to undefined if conversion fails
-			if ( 'id' in image && typeof image.id === 'string' ) {
-				const parsedId = parseInt( image.id, 10 );
-				return {
-					...image,
-					id: Number.isNaN( parsedId ) ? undefined : parsedId,
-				};
-			}
-			return image;
-		} );
+		.filter( isImageLike )
+		.filter( hasValidUrl )
+		.map( imagelikeToImage );
 };
 
 /**
