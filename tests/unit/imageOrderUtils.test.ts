@@ -10,6 +10,7 @@ import {
 	validateImagesAttribute,
 	wpMediaToImage,
 	wpMediaArrayToImages,
+	isValidWpMedia,
 } from '../../src/utils/imageOrderUtils';
 
 describe( 'moveImageInArray', () => {
@@ -663,9 +664,106 @@ describe( 'validateImagesAttribute', () => {
 	} );
 } );
 
+describe( 'isValidWpMedia', () => {
+	it( '正常なWpMediaオブジェクトを検証する', () => {
+		const validMedia = {
+			id: 123,
+			url: 'https://example.com/image.jpg',
+			alt: 'Test image',
+			caption: 'Test caption',
+			title: 'Test title',
+		};
+
+		expect( isValidWpMedia( validMedia ) ).toBe( true );
+	} );
+
+	it( '最小限の必須フィールドを持つオブジェクトを検証する', () => {
+		const minimalMedia = {
+			id: 456,
+			url: 'https://example.com/minimal.jpg',
+		};
+
+		expect( isValidWpMedia( minimalMedia ) ).toBe( true );
+	} );
+
+	it( 'nullまたはundefinedを拒否する', () => {
+		expect( isValidWpMedia( null ) ).toBe( false );
+		expect( isValidWpMedia( undefined ) ).toBe( false );
+	} );
+
+	it( 'プリミティブ型を拒否する', () => {
+		expect( isValidWpMedia( 'string' ) ).toBe( false );
+		expect( isValidWpMedia( 123 ) ).toBe( false );
+		expect( isValidWpMedia( true ) ).toBe( false );
+	} );
+
+	it( 'idが数値でない場合を拒否する', () => {
+		const invalidMedia = {
+			id: 'not-a-number',
+			url: 'https://example.com/image.jpg',
+		};
+
+		expect( isValidWpMedia( invalidMedia ) ).toBe( false );
+	} );
+
+	it( 'urlが文字列でない場合を拒否する', () => {
+		const invalidMedia = {
+			id: 123,
+			url: 12345,
+		};
+
+		expect( isValidWpMedia( invalidMedia ) ).toBe( false );
+	} );
+
+	it( 'urlが空文字列の場合を拒否する', () => {
+		const invalidMedia = {
+			id: 123,
+			url: '',
+		};
+
+		expect( isValidWpMedia( invalidMedia ) ).toBe( false );
+	} );
+
+	it( 'idまたはurlがない場合を拒否する', () => {
+		const noId = { url: 'https://example.com/image.jpg' };
+		const noUrl = { id: 123 };
+
+		expect( isValidWpMedia( noId ) ).toBe( false );
+		expect( isValidWpMedia( noUrl ) ).toBe( false );
+	} );
+
+	it( 'オプショナルフィールドの型が間違っている場合を拒否する', () => {
+		const invalidAlt = {
+			id: 123,
+			url: 'https://example.com/image.jpg',
+			alt: 456,
+		};
+
+		const invalidCaption = {
+			id: 123,
+			url: 'https://example.com/image.jpg',
+			caption: true,
+		};
+
+		expect( isValidWpMedia( invalidAlt ) ).toBe( false );
+		expect( isValidWpMedia( invalidCaption ) ).toBe( false );
+	} );
+
+	it( 'オプショナルフィールドがundefinedの場合は受け入れる', () => {
+		const mediaWithUndefined = {
+			id: 123,
+			url: 'https://example.com/image.jpg',
+			alt: undefined,
+			caption: undefined,
+		};
+
+		expect( isValidWpMedia( mediaWithUndefined ) ).toBe( true );
+	} );
+} );
+
 describe( 'wpMediaToImage', () => {
-	it( 'WordPress Media objectをImageに変換する', () => {
-		const wpMedia: WpMedia = {
+	it( '正常なWpMediaオブジェクトをImageに変換する', () => {
+		const wpMedia = {
 			id: 123,
 			url: 'https://example.com/image.jpg',
 			alt: 'Test image',
@@ -684,7 +782,7 @@ describe( 'wpMediaToImage', () => {
 	} );
 
 	it( 'オプショナルなプロパティがない場合は空文字列を使用する', () => {
-		const wpMedia: WpMedia = {
+		const wpMedia = {
 			id: 456,
 			url: 'https://example.com/minimal.jpg',
 		};
@@ -696,6 +794,25 @@ describe( 'wpMediaToImage', () => {
 			url: 'https://example.com/minimal.jpg',
 			alt: '',
 			caption: '',
+		} );
+	} );
+
+	it( '無効なオブジェクトが渡された場合はエラーをスローする', () => {
+		const invalidMedias = [
+			null,
+			undefined,
+			'string',
+			123,
+			{ id: 'invalid', url: 'test.jpg' },
+			{ id: 123, url: '' },
+			{ id: 123 }, // urlがない
+			{ url: 'test.jpg' }, // idがない
+		];
+
+		invalidMedias.forEach( ( invalidMedia ) => {
+			expect( () => wpMediaToImage( invalidMedia ) ).toThrow(
+				'Invalid WordPress media object'
+			);
 		} );
 	} );
 
@@ -725,8 +842,8 @@ describe( 'wpMediaToImage', () => {
 } );
 
 describe( 'wpMediaArrayToImages', () => {
-	it( '複数のWordPress Media objectsを変換する', () => {
-		const wpMediaArray: WpMedia[] = [
+	it( '複数の正常なWordPress Media objectsを変換する', () => {
+		const wpMediaArray = [
 			{
 				id: 1,
 				url: 'https://example.com/image1.jpg',
@@ -766,8 +883,58 @@ describe( 'wpMediaArrayToImages', () => {
 		} );
 	} );
 
+	it( '無効なオブジェクトを含む配列から有効なもののみを変換する', () => {
+		const mixedArray = [
+			{
+				id: 1,
+				url: 'https://example.com/valid1.jpg',
+				alt: 'Valid image',
+			},
+			{
+				id: 'invalid',
+				url: 'https://example.com/invalid.jpg',
+			},
+			{
+				id: 2,
+				url: '', // 空のURL
+			},
+			null,
+			{
+				id: 3,
+				url: 'https://example.com/valid2.jpg',
+			},
+			'string',
+			{
+				url: 'https://example.com/no-id.jpg', // idがない
+			},
+		];
+
+		const result = wpMediaArrayToImages( mixedArray );
+
+		expect( result ).toHaveLength( 2 );
+		expect( result[ 0 ] ).toEqual( {
+			id: 1,
+			url: 'https://example.com/valid1.jpg',
+			alt: 'Valid image',
+			caption: '',
+		} );
+		expect( result[ 1 ] ).toEqual( {
+			id: 3,
+			url: 'https://example.com/valid2.jpg',
+			alt: '',
+			caption: '',
+		} );
+	} );
+
 	it( '空配列の場合は空配列を返す', () => {
 		const result = wpMediaArrayToImages( [] );
 		expect( result ).toEqual( [] );
+	} );
+
+	it( '配列でない値を渡された場合は空配列を返す', () => {
+		expect( wpMediaArrayToImages( null as any ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( undefined as any ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( 'string' as any ) ).toEqual( [] );
+		expect( wpMediaArrayToImages( {} as any ) ).toEqual( [] );
 	} );
 } );

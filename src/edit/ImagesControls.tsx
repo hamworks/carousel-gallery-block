@@ -9,7 +9,7 @@ import { chevronUp, chevronDown } from '@wordpress/icons';
  * Internal dependencies
  */
 import '../editor.css';
-import type { Image, Media, BlockAttributes, ImageOrderAction } from '../types';
+import type { Image, BlockAttributes, ImageOrderAction } from '../types';
 import {
 	moveImageInArray,
 	removeImageAtIndex,
@@ -71,15 +71,19 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 						<div className="my-4">
 							<MediaControl
 								media={ image }
-								onSelect={ ( media: Media ) => {
-									// Use wpMediaToImage for type-safe conversion and validation
-									const validatedImage = wpMediaToImage( {
-										id: media.id,
-										url: media.url,
-										alt: media.alt,
-										caption: media.caption,
-									} );
-									selectImage( index, validatedImage );
+								onSelect={ ( media: unknown ) => {
+									try {
+										// Type-safe conversion with runtime validation
+										const validatedImage =
+											wpMediaToImage( media );
+										selectImage( index, validatedImage );
+									} catch ( error ) {
+										// eslint-disable-next-line no-console
+										console.error(
+											'Invalid media object received:',
+											error
+										);
+									}
 								} }
 								onRemove={ () => removeImage( index ) }
 							/>
