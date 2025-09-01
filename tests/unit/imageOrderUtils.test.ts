@@ -445,15 +445,23 @@ describe( 'validateImagesAttribute', () => {
 		expect( result ).toEqual( validImages );
 	} );
 
-	it( 'idがstring型の画像も有効とする', () => {
+	it( 'idがstring型の画像は数値に変換される', () => {
 		const images = [
-			{ url: 'image1.jpg', id: 'abc123' },
+			{ url: 'image1.jpg', id: '123' },
 			{ url: 'image2.jpg', id: 456 },
+			{ url: 'image3.jpg', id: 'abc123' }, // 無効な文字列
+			{ url: 'image4.jpg', id: '123.45' }, // 浮動小数点数文字列
+			{ url: 'image5.jpg', id: '0' }, // ゼロ文字列
 		];
 
 		const result = validateImagesAttribute( images );
 
-		expect( result ).toHaveLength( 2 );
+		expect( result ).toHaveLength( 5 );
+		expect( result[ 0 ].id ).toBe( 123 ); // 文字列 '123' が数値 123 に変換
+		expect( result[ 1 ].id ).toBe( 456 ); // 元々数値なのでそのまま
+		expect( result[ 2 ].id ).toBeUndefined(); // 無効な文字列は undefined
+		expect( result[ 3 ].id ).toBe( 123 ); // '123.45' は parseInt で 123 に変換
+		expect( result[ 4 ].id ).toBe( 0 ); // '0' は 0 に変換
 	} );
 
 	it( '無効な画像オブジェクトをフィルタリングする', () => {

@@ -316,17 +316,29 @@ export const validateImagesAttribute = ( images: unknown ): Image[] => {
 		return [];
 	}
 
-	return images.filter( ( image ): image is Image => {
-		return (
-			image &&
-			typeof image === 'object' &&
-			'url' in image &&
-			typeof image.url === 'string' &&
-			( ! ( 'id' in image ) ||
-				typeof image.id === 'number' ||
-				typeof image.id === 'string' )
-		);
-	} );
+	return images
+		.filter( ( image ): image is Image => {
+			return (
+				image &&
+				typeof image === 'object' &&
+				'url' in image &&
+				typeof image.url === 'string' &&
+				( ! ( 'id' in image ) ||
+					typeof image.id === 'number' ||
+					typeof image.id === 'string' )
+			);
+		} )
+		.map( ( image ) => {
+			// Normalize string id to number, or set to undefined if conversion fails
+			if ( 'id' in image && typeof image.id === 'string' ) {
+				const parsedId = parseInt( image.id, 10 );
+				return {
+					...image,
+					id: Number.isNaN( parsedId ) ? undefined : parsedId,
+				};
+			}
+			return image;
+		} );
 };
 
 /**
