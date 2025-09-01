@@ -5,7 +5,6 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { PanelBody, RangeControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,59 +20,49 @@ export default function Edit( props: EditProps ): JSX.Element {
 	const { attributes, setAttributes } = props;
 	const { images, speed, direction } = attributes;
 
-	const handleSpeedChange = useCallback(
-		( value: number | undefined ): void => {
-			if ( typeof value === 'number' && value >= 1 && value <= 10 ) {
-				setAttributes( { speed: value } );
-			} else {
-				setAttributes( { speed: 1 } );
-			}
-		},
-		[ setAttributes ]
-	);
+	const handleSpeedChange = ( value: number | undefined ): void => {
+		if ( typeof value === 'number' && value >= 1 && value <= 10 ) {
+			setAttributes( { speed: value } );
+		} else {
+			setAttributes( { speed: 1 } );
+		}
+	};
 
-	const handleDirectionChange = useCallback(
-		( checked: boolean ): void => {
-			const newDirection: BlockAttributes[ 'direction' ] = checked
-				? 'rtl'
-				: 'ltr';
-			setAttributes( { direction: newDirection } );
-		},
-		[ setAttributes ]
-	);
-
-	const inspectorControls: JSX.Element = (
-		<InspectorControls>
-			<PanelBody
-				title={ __( 'Media settings', 'carousel-gallery-block' ) }
-				initialOpen={ true }
-			>
-				<RangeControl
-					label={ __( 'Speed', 'carousel-gallery-block' ) }
-					value={ speed }
-					min={ 1 }
-					max={ 10 }
-					onChange={ handleSpeedChange }
-				/>
-				<ToggleControl
-					label={ __(
-						'Reverse direction',
-						'carousel-gallery-block'
-					) }
-					checked={ direction === 'rtl' }
-					onChange={ handleDirectionChange }
-				/>
-				<ImagesControls
-					images={ images }
-					setAttributes={ setAttributes }
-				/>
-			</PanelBody>
-		</InspectorControls>
-	);
+	const handleDirectionChange = ( checked: boolean ): void => {
+		const newDirection: BlockAttributes[ 'direction' ] = checked
+			? 'rtl'
+			: 'ltr';
+		setAttributes( { direction: newDirection } );
+	};
 
 	return (
 		<div { ...useBlockProps() }>
-			{ inspectorControls }
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Media settings', 'carousel-gallery-block' ) }
+					initialOpen={ true }
+				>
+					<RangeControl
+						label={ __( 'Speed', 'carousel-gallery-block' ) }
+						value={ speed }
+						min={ 1 }
+						max={ 10 }
+						onChange={ handleSpeedChange }
+					/>
+					<ToggleControl
+						label={ __(
+							'Reverse direction',
+							'carousel-gallery-block'
+						) }
+						checked={ direction === 'rtl' }
+						onChange={ handleDirectionChange }
+					/>
+					<ImagesControls
+						images={ images }
+						setAttributes={ setAttributes }
+					/>
+				</PanelBody>
+			</InspectorControls>
 			<Images images={ images } />
 		</div>
 	);

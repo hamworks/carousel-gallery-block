@@ -24,10 +24,10 @@ type Props = {
 	setAttributes: ( attributes: Partial< BlockAttributes > ) => void;
 };
 
-const empty = {
+const EMPTY_IMAGE: Image = {
 	url: '',
 	id: undefined,
-};
+} as const;
 
 const ImagesControls = ( { images, setAttributes }: Props ) => {
 	const selectImage = ( index: number, props: Image ) => {
@@ -76,14 +76,7 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 								onRemove={ () => removeImage( index ) }
 							/>
 							{ images.length > 1 && (
-								<div
-									className="image-order-controls"
-									style={ {
-										marginTop: '8px',
-										display: 'flex',
-										gap: '4px',
-									} }
-								>
+								<div className="image-order-controls">
 									<Button
 										icon={ chevronUp }
 										disabled={ index === 0 }
@@ -121,7 +114,7 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 			<Button
 				className="is-primary"
 				onClick={ () => {
-					const result = addImageToArray( images, empty );
+					const result = addImageToArray( images, EMPTY_IMAGE );
 					if ( result.success ) {
 						setAttributes( { images: result.newImages } );
 					}
