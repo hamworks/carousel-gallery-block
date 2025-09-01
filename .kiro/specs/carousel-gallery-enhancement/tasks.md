@@ -60,31 +60,31 @@
   - エラーハンドリングとバリデーション機能を含める
   - _要件: 2.2, 2.3, 2.4_
 
-- [ ] 2. ブロック定義とコア機能の拡張
+- [x] 2. ブロック定義とコア機能の拡張
   - `block.json`に新しい属性を追加
   - 属性のデフォルト値とバリデーションを設定
   - _要件: 1.1, 1.2_
 
-- [ ] 2.1 block.jsonの属性拡張
+- [x] 2.1 block.jsonの属性拡張
   - `direction`属性（デフォルト: 'ltr', enum: ['ltr', 'rtl']）を追加
   - 既存の`images`属性構造を維持しつつ、新しいプロパティに対応
   - 属性のスキーマ定義とバリデーションルールを設定
   - _要件: 1.1, 1.2_
 
-- [ ] 3. エディターUI機能の実装
+- [x] 3. エディターUI機能の実装
   - InspectorControlsに方向制御トグルを追加
   - 画像順序管理UIコンポーネントを実装
   - WordPress公式コンポーネントを活用したアクセシブルなUI
   - WordPress依存コンポーネントはE2Eテストで検証
   - _要件: 1.3, 1.4, 2.1, 2.6, 2.7, 2.8_
 
-- [ ] 3.1 方向制御UIの実装
+- [x] 3.1 方向制御UIの実装
   - `src/edit/index.tsx`のInspectorControlsにToggleControlを追加
   - DefinitelyTyped型定義を使用した型安全な実装
   - 国際化対応されたラベルとアクセシビリティ属性を設定
   - _要件: 1.3, 1.4_
 
-- [ ] 3.2 画像順序管理コンポーネントの実装
+- [x] 3.2 画像順序管理コンポーネントの実装
   - `src/edit/ImagesControls.tsx`を拡張して順序変更ボタンを追加
   - WordPressのButton, BaseControl, MediaUploadコンポーネントを使用
   - chevronUp, chevronDownアイコンを使用したシンプルなUI
