@@ -53,6 +53,7 @@
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
+		"@tailwindcss/postcss": "^4.1.12",
 		"@wordpress/block-editor": "^15.2.0",
 		"@wordpress/blocks": "^15.2.0",
 		"@wordpress/components": "^30.2.0",
@@ -61,7 +62,8 @@
 		"@wordpress/element": "^6.29.0",
 		"@wordpress/hooks": "^4.29.0",
 		"@wordpress/i18n": "^6.2.0",
-		"keen-slider": "^6.8.6"
+		"keen-slider": "^6.8.6",
+		"tailwindcss": "^4.1.12"
 	},
 	"lint-staged": {
 		"src/**/*.{js,ts,tsx}": [
