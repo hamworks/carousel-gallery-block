@@ -64,30 +64,3 @@ export interface ImageOrderResult {
 	newImages: Image[];
 	error?: string;
 }
-
-// WordPress global types for tests
-declare global {
-	interface Window {
-		wp: {
-			i18n: {
-				__: ( text: string ) => string;
-				_x: ( text: string ) => string;
-				_n: (
-					single: string,
-					plural: string,
-					number: number
-				) => string;
-			};
-			element: {
-				createElement: () => null;
-				Fragment: string;
-			};
-			components: any;
-			blockEditor: any;
-			data: {
-				useSelect: () => any;
-				useDispatch: () => any;
-			};
-		};
-	}
-}
