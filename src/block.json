@@ -3,10 +3,10 @@
 	"apiVersion": 3,
 	"name": "hamworks/carousel-gallery-block",
 	"version": "0.1.0",
-	"title": "ロゴカルーセル",
+	"title": "Carousel Gallery Block",
 	"category": "design",
 	"icon": "format-gallery",
-	"description": "ロゴカルーセル",
+	"description": "A customizable carousel gallery block for displaying images with direction control and speed settings.",
 	"supports": {
 		"anchor": true,
 		"html": false,
