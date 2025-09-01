@@ -5,27 +5,20 @@
 import type { MockedFunction } from 'vitest';
 import type * as Components from '@wordpress/components';
 import type * as BlockEditor from '@wordpress/block-editor';
+import type * as I18n from '@wordpress/i18n';
+import type * as Element from '@wordpress/element';
 
 // WordPress i18n mock types
 interface WpI18n {
-	__: MockedFunction< ( text: string, domain?: string ) => string >;
-	_x: MockedFunction<
-		( text: string, context: string, domain?: string ) => string
-	>;
-	_n: MockedFunction<
-		(
-			single: string,
-			plural: string,
-			number: number,
-			domain?: string
-		) => string
-	>;
+	__: MockedFunction< typeof I18n.__ >;
+	_x: MockedFunction< typeof I18n._x >;
+	_n: MockedFunction< typeof I18n._n >;
 }
 
 // WordPress element mock types
 interface WpElement {
-	createElement: MockedFunction< () => null >;
-	Fragment: string;
+	createElement: MockedFunction< typeof Element.createElement >;
+	Fragment: typeof Element.Fragment;
 }
 
 // WordPress data mock types
