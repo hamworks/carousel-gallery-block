@@ -76,7 +76,7 @@ const ImagesControls = ( { images, setAttributes }: Props ) => {
 								onRemove={ () => removeImage( index ) }
 							/>
 							{ images.length > 1 && (
-								<div className="image-order-controls">
+								<div className="wp-block-satori-blocks-logo-carousel__image-order-controls">
 									<Button
 										icon={ chevronUp }
 										disabled={ index === 0 }

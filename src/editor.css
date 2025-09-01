@@ -1,8 +1,4 @@
-:root {
-	--satori-logo-carousel-item-padding: 0;
-}
-
-.image-order-controls {
+.wp-block-satori-blocks-logo-carousel__image-order-controls {
 	margin-top: 8px;
 	display: flex;
 	gap: 4px;
