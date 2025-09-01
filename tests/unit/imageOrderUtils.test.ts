@@ -1,11 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import type { Image } from '../../src/types';
+import { describe, it, expect, vi } from 'vitest';
+import type { Image, WpMedia } from '../../src/types';
 import {
 	moveImageInArray,
 	replaceImageAtIndex,
 	removeImageAtIndex,
 	addImageToArray,
 	imageOrderStateUpdaters,
+	createBlockAttributeUpdaters,
+	validateImagesAttribute,
+	wpMediaToImage,
+	wpMediaArrayToImages,
 } from '../../src/utils/imageOrderUtils';
 
 describe( 'moveImageInArray', () => {
@@ -363,5 +367,232 @@ describe( 'imageOrderStateUpdaters - React最適化関数', () => {
 			// 関数の実行結果が同じであることを確認
 			expect( updater1( mockImages ) ).toEqual( updater2( mockImages ) );
 		} );
+	} );
+} );
+
+describe( 'createBlockAttributeUpdaters', () => {
+	it( 'setAttributesと統合して画像を移動できる', () => {
+		const setAttributes = vi.fn();
+		const helpers = createBlockAttributeUpdaters( setAttributes );
+
+		helpers.moveImage( 1, 'moveUp' );
+
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			images: expect.any( Function ),
+		} );
+	} );
+
+	it( 'setAttributesと統合して画像を置き換えできる', () => {
+		const setAttributes = vi.fn();
+		const helpers = createBlockAttributeUpdaters( setAttributes );
+		const newImage: Image = { url: 'new.jpg', id: 99 };
+
+		helpers.replaceImage( 1, newImage );
+
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			images: expect.any( Function ),
+		} );
+	} );
+
+	it( 'setAttributesと統合して画像を削除できる', () => {
+		const setAttributes = vi.fn();
+		const helpers = createBlockAttributeUpdaters( setAttributes );
+
+		helpers.removeImage( 1 );
+
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			images: expect.any( Function ),
+		} );
+	} );
+
+	it( 'setAttributesと統合して画像を追加できる', () => {
+		const setAttributes = vi.fn();
+		const helpers = createBlockAttributeUpdaters( setAttributes );
+		const newImage: Image = { url: 'new.jpg', id: 4 };
+
+		helpers.addImage( newImage );
+
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			images: expect.any( Function ),
+		} );
+	} );
+
+	it( 'カスタム属性名を指定できる', () => {
+		const setAttributes = vi.fn();
+		const helpers = createBlockAttributeUpdaters(
+			setAttributes,
+			'gallery'
+		);
+
+		helpers.moveImage( 0, 'moveDown' );
+
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			gallery: expect.any( Function ),
+		} );
+	} );
+} );
+
+describe( 'validateImagesAttribute', () => {
+	it( '有効な画像配列を正しく検証する', () => {
+		const validImages = [
+			{ url: 'image1.jpg', id: 1, alt: 'First' },
+			{ url: 'image2.jpg', id: 2 },
+			{ url: 'image3.jpg' },
+		];
+
+		const result = validateImagesAttribute( validImages );
+
+		expect( result ).toEqual( validImages );
+	} );
+
+	it( 'idがstring型の画像も有効とする', () => {
+		const images = [
+			{ url: 'image1.jpg', id: 'abc123' },
+			{ url: 'image2.jpg', id: 456 },
+		];
+
+		const result = validateImagesAttribute( images );
+
+		expect( result ).toHaveLength( 2 );
+	} );
+
+	it( '無効な画像オブジェクトをフィルタリングする', () => {
+		const mixedData = [
+			{ url: 'valid.jpg', id: 1 },
+			{ notUrl: 'invalid.jpg' }, // urlプロパティがない
+			{ url: 123 }, // urlが文字列でない
+			null,
+			undefined,
+			'string',
+			{ url: 'valid2.jpg' },
+		];
+
+		const result = validateImagesAttribute( mixedData );
+
+		expect( result ).toHaveLength( 2 );
+		expect( result[ 0 ] ).toEqual( { url: 'valid.jpg', id: 1 } );
+		expect( result[ 1 ] ).toEqual( { url: 'valid2.jpg' } );
+	} );
+
+	it( '配列でない場合は空配列を返す', () => {
+		expect( validateImagesAttribute( null ) ).toEqual( [] );
+		expect( validateImagesAttribute( undefined ) ).toEqual( [] );
+		expect( validateImagesAttribute( 'string' ) ).toEqual( [] );
+		expect( validateImagesAttribute( {} ) ).toEqual( [] );
+		expect( validateImagesAttribute( 123 ) ).toEqual( [] );
+	} );
+
+	it( '空配列の場合は空配列を返す', () => {
+		const result = validateImagesAttribute( [] );
+		expect( result ).toEqual( [] );
+	} );
+} );
+
+describe( 'wpMediaToImage', () => {
+	it( 'WordPress Media objectをImageに変換する', () => {
+		const wpMedia: WpMedia = {
+			id: 123,
+			url: 'https://example.com/image.jpg',
+			alt: 'Test image',
+			caption: 'Test caption',
+			title: 'Test title',
+		};
+
+		const result = wpMediaToImage( wpMedia );
+
+		expect( result ).toEqual( {
+			id: 123,
+			url: 'https://example.com/image.jpg',
+			alt: 'Test image',
+			caption: 'Test caption',
+		} );
+	} );
+
+	it( 'オプショナルなプロパティがない場合は空文字列を使用する', () => {
+		const wpMedia: WpMedia = {
+			id: 456,
+			url: 'https://example.com/minimal.jpg',
+		};
+
+		const result = wpMediaToImage( wpMedia );
+
+		expect( result ).toEqual( {
+			id: 456,
+			url: 'https://example.com/minimal.jpg',
+			alt: '',
+			caption: '',
+		} );
+	} );
+
+	it( 'sizesプロパティは無視される', () => {
+		const wpMedia: WpMedia = {
+			id: 789,
+			url: 'https://example.com/image.jpg',
+			sizes: {
+				thumbnail: {
+					url: 'https://example.com/thumb.jpg',
+					width: 150,
+					height: 150,
+				},
+			},
+		};
+
+		const result = wpMediaToImage( wpMedia );
+
+		expect( result ).toEqual( {
+			id: 789,
+			url: 'https://example.com/image.jpg',
+			alt: '',
+			caption: '',
+		} );
+		expect( 'sizes' in result ).toBe( false );
+	} );
+} );
+
+describe( 'wpMediaArrayToImages', () => {
+	it( '複数のWordPress Media objectsを変換する', () => {
+		const wpMediaArray: WpMedia[] = [
+			{
+				id: 1,
+				url: 'https://example.com/image1.jpg',
+				alt: 'First image',
+			},
+			{
+				id: 2,
+				url: 'https://example.com/image2.jpg',
+				caption: 'Second image',
+			},
+			{
+				id: 3,
+				url: 'https://example.com/image3.jpg',
+			},
+		];
+
+		const result = wpMediaArrayToImages( wpMediaArray );
+
+		expect( result ).toHaveLength( 3 );
+		expect( result[ 0 ] ).toEqual( {
+			id: 1,
+			url: 'https://example.com/image1.jpg',
+			alt: 'First image',
+			caption: '',
+		} );
+		expect( result[ 1 ] ).toEqual( {
+			id: 2,
+			url: 'https://example.com/image2.jpg',
+			alt: '',
+			caption: 'Second image',
+		} );
+		expect( result[ 2 ] ).toEqual( {
+			id: 3,
+			url: 'https://example.com/image3.jpg',
+			alt: '',
+			caption: '',
+		} );
+	} );
+
+	it( '空配列の場合は空配列を返す', () => {
+		const result = wpMediaArrayToImages( [] );
+		expect( result ).toEqual( [] );
 	} );
 } );

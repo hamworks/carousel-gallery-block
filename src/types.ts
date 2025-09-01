@@ -3,13 +3,23 @@
  */
 
 /**
- * @description Minimal WordPress media item type
+ * @description WordPress media item type with complete metadata
+ * Matches the structure of WordPress Media Library objects
  */
 export type WpMedia = {
 	id: number;
 	url: string;
 	alt?: string;
 	caption?: string;
+	title?: string;
+	link?: string;
+	sizes?: {
+		[ key: string ]: {
+			url: string;
+			width: number;
+			height: number;
+		};
+	};
 };
 
 /**

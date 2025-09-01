@@ -1,19 +1,36 @@
-import type { Image, ImageOrderAction, ImageOrderResult } from '../types';
+import type {
+	Image,
+	ImageOrderAction,
+	ImageOrderResult,
+	WpMedia,
+} from '../types';
+import { __ } from '@wordpress/i18n';
 
 /**
- * @description Error messages for image order operations
- * Using const assertion for better type inference and reference stability
+ * @description Error messages for image order operations with WordPress i18n support
+ * Using function calls for internationalization compatibility
  */
-const ERROR_MESSAGES = {
-	INVALID_INDEX: 'Invalid image index',
-	CANNOT_MOVE_FIRST_UP: 'Cannot move first image up',
-	CANNOT_MOVE_LAST_DOWN: 'Cannot move last image down',
-} as const;
+const getErrorMessages = () => ( {
+	INVALID_INDEX: __( 'Invalid image index', 'carousel-gallery-block' ),
+	CANNOT_MOVE_FIRST_UP: __(
+		'Cannot move first image up',
+		'carousel-gallery-block'
+	),
+	CANNOT_MOVE_LAST_DOWN: __(
+		'Cannot move last image down',
+		'carousel-gallery-block'
+	),
+} );
+
+/**
+ * @description Cached error messages (evaluated once per runtime)
+ */
+const ERROR_MESSAGES = getErrorMessages();
 
 /**
  * @description Type-safe error message type
  */
-type ErrorMessage = ( typeof ERROR_MESSAGES )[ keyof typeof ERROR_MESSAGES ];
+type ErrorMessage = string; // Changed to string for i18n compatibility
 
 /**
  * @description Validates if an index is within the valid range for an array
@@ -247,3 +264,96 @@ export const imageOrderStateUpdaters = {
 	 */
 	add: createStateUpdater( addImageToArray ),
 } as const;
+
+/**
+ * @description WordPress Block attributes integration helper
+ * Creates updater functions that work with WordPress block's setAttributes
+ * @param {Function} setAttributes - Block's setAttributes function
+ * @param {string}   attributeName - Name of the attribute containing images array
+ * @return Object with WordPress-integrated image manipulation methods
+ * @example
+ * ```typescript
+ * const imageHelpers = createBlockAttributeUpdaters(setAttributes, 'images');
+ * imageHelpers.moveImage(0, 'moveDown');
+ * ```
+ */
+export const createBlockAttributeUpdaters = (
+	setAttributes: ( attrs: Record< string, unknown > ) => void,
+	attributeName = 'images'
+) => {
+	const updateImages = (
+		operation: ( images: readonly Image[] ) => Image[]
+	) => {
+		setAttributes( {
+			[ attributeName ]: operation,
+		} );
+	};
+
+	return {
+		moveImage: ( index: number, action: ImageOrderAction ) =>
+			updateImages( imageOrderStateUpdaters.move( index, action ) ),
+		replaceImage: ( index: number, newImage: Image ) =>
+			updateImages( imageOrderStateUpdaters.replace( index, newImage ) ),
+		removeImage: ( index: number ) =>
+			updateImages( imageOrderStateUpdaters.remove( index ) ),
+		addImage: ( newImage: Image ) =>
+			updateImages( imageOrderStateUpdaters.add( newImage ) ),
+	};
+};
+
+/**
+ * @description Validates images array for WordPress block attributes
+ * Ensures type safety when receiving images from block attributes
+ * @param {unknown} images - Raw images data from block attributes
+ * @return {Image[]} Validated and typed images array
+ * @example
+ * ```typescript
+ * const safeImages = validateImagesAttribute(attributes.images);
+ * ```
+ */
+export const validateImagesAttribute = ( images: unknown ): Image[] => {
+	if ( ! Array.isArray( images ) ) {
+		return [];
+	}
+
+	return images.filter( ( image ): image is Image => {
+		return (
+			image &&
+			typeof image === 'object' &&
+			'url' in image &&
+			typeof image.url === 'string' &&
+			( ! ( 'id' in image ) ||
+				typeof image.id === 'number' ||
+				typeof image.id === 'string' )
+		);
+	} );
+};
+
+/**
+ * @description Convert WordPress media object to Image type
+ * Integrates with WordPress Media Library selection
+ * @param {WpMedia} media - WordPress media object from Media Library
+ * @return {Image} Converted image object
+ * @example
+ * ```typescript
+ * const onSelectMedia = (media: WpMedia) => {
+ *   const image = wpMediaToImage(media);
+ *   addImage(image);
+ * };
+ * ```
+ */
+export const wpMediaToImage = ( media: WpMedia ): Image => ( {
+	id: media.id,
+	url: media.url,
+	alt: media.alt || '',
+	caption: media.caption || '',
+} );
+
+/**
+ * @description Convert multiple WordPress media objects to Image array
+ * @param {WpMedia[]} mediaArray - Array of WordPress media objects
+ * @return {Image[]} Array of converted image objects
+ */
+export const wpMediaArrayToImages = ( mediaArray: WpMedia[] ): Image[] => {
+	return mediaArray.map( wpMediaToImage );
+};
