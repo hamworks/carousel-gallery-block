@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { Fragment as WpFragment } from '@wordpress/element';
 import type { MockedFunction } from 'vitest';
 
 // WordPress global mock setup
@@ -25,11 +26,9 @@ Object.defineProperty( window, 'wp', {
 			>,
 		},
 		element: {
-			createElement: vi.fn() as MockedFunction<
-				typeof import('@wordpress/element').createElement
-			>,
-			Fragment:
-				'Fragment' as unknown as typeof import('@wordpress/element').Fragment,
+			createElement:
+				vi.fn< typeof import('@wordpress/element').createElement >(),
+			Fragment: WpFragment,
 		},
 		components: {
 			Button: vi.fn( () => null ),

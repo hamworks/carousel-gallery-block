@@ -7,6 +7,7 @@ import type * as Components from '@wordpress/components';
 import type * as BlockEditor from '@wordpress/block-editor';
 import type * as I18n from '@wordpress/i18n';
 import type * as Element from '@wordpress/element';
+import { Fragment as WpFragment } from '@wordpress/element';
 
 // WordPress i18n mock types
 interface WpI18n {
@@ -18,7 +19,7 @@ interface WpI18n {
 // WordPress element mock types
 interface WpElement {
 	createElement: MockedFunction< typeof Element.createElement >;
-	Fragment: typeof Element.Fragment;
+	Fragment: typeof WpFragment;
 }
 
 // WordPress data mock types
