@@ -5,11 +5,11 @@ type Props = {
 };
 
 const Images = ( { images }: Props ) => (
-	<div className="wp-block-satori-blocks-logo-carousel__images">
+	<div className="wp-block-hamworks-carousel-gallery-block__images">
 		{ images.map( ( image, index ) => (
 			<div
 				key={ image.id || `temp-${ index }` }
-				className="wp-block-satori-blocks-logo-carousel__image"
+				className="wp-block-hamworks-carousel-gallery-block__image"
 			>
 				<img
 					src={ image.url || '' }
