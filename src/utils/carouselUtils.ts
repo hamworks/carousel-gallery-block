@@ -9,14 +9,20 @@
  * KeenSlider's loop functionality may not work properly, causing images to appear cut off.
  * This function duplicates the existing images to meet the minimum requirement.
  *
- * @param container - The images container element
- * @param perView   - The perView value from KeenSlider configuration
+ * @param container    - The images container element
+ * @param perView      - The perView value from KeenSlider configuration
+ * @param itemSelector - CSS selector for carousel items (defaults to WordPress block class)
  * @return Object with success status and number of slides duplicated
  *
  * @example
  * ```typescript
  * const container = document.querySelector('.carousel-images');
+ * // Using default WordPress selector
  * const result = duplicateSlides(container, 2.5);
+ *
+ * // Using custom selector for generic carousel
+ * const customResult = duplicateSlides(container, 2.5, '.carousel-item');
+ *
  * if (result.success) {
  *   console.log(`Duplicated ${result.duplicatedCount} slides`);
  * }
@@ -24,12 +30,11 @@
  */
 export const duplicateSlides = (
 	container: HTMLElement,
-	perView: number
+	perView: number,
+	itemSelector = '.wp-block-hamworks-carousel-gallery-block__image'
 ): { success: boolean; duplicatedCount: number; error?: string } => {
 	try {
-		const images = container.querySelectorAll(
-			'.wp-block-hamworks-carousel-gallery-block__image'
-		);
+		const images = container.querySelectorAll( itemSelector );
 
 		if ( images.length === 0 ) {
 			return {

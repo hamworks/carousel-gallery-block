@@ -184,5 +184,71 @@ describe( 'carouselUtils', () => {
 			result = duplicateSlides( mockContainer, 3.5 );
 			expect( result.duplicatedCount ).toBe( 6 );
 		} );
+
+		it( 'should work with custom item selector', () => {
+			// Create container with custom class items
+			const customContainer = document.createElement( 'div' );
+			for ( let i = 0; i < 2; i++ ) {
+				const customItem = document.createElement( 'div' );
+				customItem.className = 'custom-carousel-item';
+				customItem.classList.add( 'keen-slider__slide' );
+
+				const img = document.createElement( 'img' );
+				img.setAttribute( 'data-id', `custom-image-${ i + 1 }` );
+				img.src = `custom-test-image-${ i + 1 }.jpg`;
+
+				customItem.appendChild( img );
+				customContainer.appendChild( customItem );
+			}
+
+			// Test with custom selector
+			const result = duplicateSlides(
+				customContainer,
+				2.5,
+				'.custom-carousel-item'
+			);
+
+			expect( result.success ).toBe( true );
+			expect( result.duplicatedCount ).toBe( 4 );
+
+			// Verify custom items were duplicated
+			const allCustomItems = customContainer.querySelectorAll(
+				'.custom-carousel-item'
+			);
+			expect( allCustomItems.length ).toBe( 6 );
+
+			// Verify duplicated items have correct classes
+			const duplicatedItems = customContainer.querySelectorAll(
+				'.carousel-duplicated-slide'
+			);
+			expect( duplicatedItems.length ).toBe( 4 );
+		} );
+
+		it( 'should return error when no items found with custom selector', () => {
+			// Test with non-existent custom selector
+			const result = duplicateSlides(
+				mockContainer,
+				2.5,
+				'.non-existent-class'
+			);
+
+			expect( result.success ).toBe( false );
+			expect( result.duplicatedCount ).toBe( 0 );
+			expect( result.error ).toBe( 'No images found in container' );
+		} );
+
+		it( 'should maintain backward compatibility when no selector provided', () => {
+			// Test that default behavior is unchanged
+			const result = duplicateSlides( mockContainer, 2.5 );
+
+			expect( result.success ).toBe( true );
+			expect( result.duplicatedCount ).toBe( 4 );
+
+			// Verify WordPress class items were found and duplicated
+			const allImages = mockContainer.querySelectorAll(
+				'.wp-block-hamworks-carousel-gallery-block__image'
+			);
+			expect( allImages.length ).toBe( 6 );
+		} );
 	} );
 } );
