@@ -1,5 +1,11 @@
 import KeenSlider from 'keen-slider';
+import { getCarouselPerView } from './utils/loadingUtils';
+import { duplicateSlides } from './utils/carouselUtils';
 
+/**
+ * @description Initializes carousel gallery blocks on page load
+ * Reads data attributes for speed and direction settings, then creates KeenSlider instances
+ */
 document.addEventListener( 'DOMContentLoaded', () => {
 	document
 		.querySelectorAll< HTMLElement >(
@@ -8,6 +14,13 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		.forEach( ( el ) => {
 			el.classList.add( `is-loading` );
 			const speed = el.getAttribute( 'data-speed' ) || '1';
+
+			/**
+			 * @description Reads and validates direction attribute from block element
+			 * @return 'rtl' for right-to-left direction, 'ltr' for left-to-right (default)
+			 */
+			const rawDirection = el.getAttribute( 'data-direction' );
+			const direction = rawDirection === 'rtl' ? 'rtl' : 'ltr';
 			const images = el.querySelector< HTMLElement >(
 				'.wp-block-hamworks-carousel-gallery-block__images'
 			);
@@ -15,30 +28,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				return;
 			}
 
-			/**
-			 * Count を超えるまで、要素を複製。
-			 * @param count
-			 */
-			const duplicateSlides = ( count = 1 ) => {
-				const originalSlides = el.querySelectorAll(
-					'.wp-block-hamworks-carousel-gallery-block__image'
-				);
+			// Add keen-slider class to images container for official CSS support
+			images.classList.add( 'keen-slider' );
 
-				if ( images && originalSlides.length > 0 ) {
-					const currentSlideCount = images.children.length;
-					const slidesToAdd = Math.floor( count / currentSlideCount );
-					if ( slidesToAdd > 0 ) {
-						for ( let i = 0; i < slidesToAdd; i++ ) {
-							originalSlides.forEach( ( slide ) => {
-								const clone = slide.cloneNode( true );
-								images.appendChild( clone );
-							} );
-						}
-					}
-				}
-			};
-
-			duplicateSlides( 20 );
+			// Add keen-slider__slide class to each image for official CSS support
+			const imageElements = images.querySelectorAll(
+				'.wp-block-hamworks-carousel-gallery-block__image'
+			);
+			imageElements.forEach( ( imageElement ) => {
+				imageElement.classList.add( 'keen-slider__slide' );
+			} );
 
 			const count = images.children.length;
 			const idx = count - 1;
@@ -48,34 +47,69 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 			window.addEventListener( `load`, () => {
 				el.classList.remove( `is-loading` );
-				new KeenSlider( images, {
-					loop: true,
-					renderMode: 'performance',
-					slides: {
-						perView: 'auto',
-					},
-					selector:
-						'.wp-block-hamworks-carousel-gallery-block__image',
-					drag: false,
 
-					created( s ) {
-						s.moveToIdx( idx, true, animation );
-					},
-					updated( s ) {
-						s.moveToIdx(
-							s.track.details.abs + idx,
-							true,
-							animation
+				/**
+				 * @description Initialize KeenSlider with error handling
+				 * Applies direction (RTL/LTR) setting and creates infinite loop carousel
+				 * Uses official keen-slider classes for proper CSS integration
+				 * Duplicates slides if necessary for smooth looping
+				 */
+				try {
+					const perView = getCarouselPerView();
+
+					// Duplicate slides if necessary for smooth looping
+					const duplicationResult = duplicateSlides(
+						images,
+						perView
+					);
+					if (
+						! duplicationResult.success &&
+						duplicationResult.error
+					) {
+						// eslint-disable-next-line no-console
+						console.warn(
+							'Slide duplication failed:',
+							duplicationResult.error
 						);
-					},
-					animationEnded( s ) {
-						s.moveToIdx(
-							s.track.details.abs + idx,
-							true,
-							animation
-						);
-					},
-				} );
+					}
+
+					new KeenSlider( images, {
+						loop: true,
+						renderMode: 'performance',
+						slides: {
+							perView,
+							spacing: 16,
+						},
+						drag: false,
+						rtl: direction === 'rtl',
+
+						created( s ) {
+							s.moveToIdx( idx, true, animation );
+						},
+						updated( s ) {
+							s.moveToIdx(
+								s.track.details.abs + idx,
+								true,
+								animation
+							);
+						},
+						animationEnded( s ) {
+							s.moveToIdx(
+								s.track.details.abs + idx,
+								true,
+								animation
+							);
+						},
+					} );
+				} catch ( error ) {
+					/**
+					 * @description Fallback handling for KeenSlider initialization errors
+					 * Logs error and applies fallback class for static display
+					 */
+					// eslint-disable-next-line no-console
+					console.error( 'Carousel initialization failed:', error );
+					el.classList.add( 'carousel-fallback' );
+				}
 			} );
 		} );
 } );

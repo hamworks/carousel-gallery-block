@@ -3,3 +3,24 @@
 	display: flex;
 	gap: 4px;
 }
+
+.wp-block-hamworks-carousel-gallery-block__images {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	overflow: hidden;
+	position: relative;
+	user-select: none;
+	touch-action: pan-y;
+	width: 100%;
+}
+
+.wp-block-hamworks-carousel-gallery-block__image {
+	width: auto !important;
+	display: block;
+	height: 100%;
+	position: relative;
+	transition-property: transform;
+	min-width: 0;
+	flex: 0 0 300px;
+}
