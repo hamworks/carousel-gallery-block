@@ -3,7 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockSaveProps } from '@wordpress/blocks';
-import { __, sprintf } from '@wordpress/i18n';
+import { _n, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -21,8 +21,10 @@ export default function Save( props: BlockSaveProps< BlockAttributes > ) {
 		role: 'region',
 		'aria-label': sprintf(
 			/* translators: %d: number of images in the carousel gallery */
-			__(
+			_n(
+				'Image carousel gallery with %d image',
 				'Image carousel gallery with %d images',
+				images.length,
 				'carousel-gallery-block'
 			),
 			images.length

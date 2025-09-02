@@ -278,7 +278,7 @@ export default ImagesControls;
 ```typescript
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockSaveProps } from '@wordpress/blocks';
-import { __, sprintf } from '@wordpress/i18n';
+import { _n, sprintf } from '@wordpress/i18n';
 import type { BlockAttributes } from './types';
 import Images from './Images';
 
@@ -291,9 +291,10 @@ export default function Save( props: BlockSaveProps< BlockAttributes > ) {
     'data-direction': direction,
     role: 'region',
     'aria-label': sprintf(
-      /* translators: %d: number of images in the carousel gallery */
-      __(
+      _n(
+        'Image carousel gallery with %d image',
         'Image carousel gallery with %d images',
+        images.length,
         'carousel-gallery-block'
       ),
       images.length
@@ -628,8 +629,12 @@ export default function Save( props: BlockSaveProps< BlockAttributes > ) {
   const { images, speed, direction } = attributes;
 
   const ariaLabel = sprintf(
-    /* translators: %d: number of images in the carousel gallery */
-    __( 'Image carousel gallery with %d images', 'carousel-gallery-block' ),
+    _n(
+      'Image carousel gallery with %d image',
+      'Image carousel gallery with %d images',
+      images.length,
+      'carousel-gallery-block'
+    ),
     images.length
   );
 
@@ -650,8 +655,12 @@ export default function Save( props: BlockSaveProps< BlockAttributes > ) {
 // 汎用ユーティリティ関数（再利用可能）
 export const generateCarouselAriaLabel = ( imageCount: number ): string => {
   return sprintf(
-    /* translators: %d: number of images in the carousel gallery */
-    __( 'Image carousel gallery with %d images', 'carousel-gallery-block' ),
+    _n(
+      'Image carousel gallery with %d image',
+      'Image carousel gallery with %d images',
+      imageCount,
+      'carousel-gallery-block'
+    ),
     imageCount
   );
 };
