@@ -9,20 +9,11 @@
 	opacity: 0;
 }
 
-.wp-block-hamworks-carousel-gallery-block__images {
-	position: relative;
-}
-
-.wp-block-hamworks-carousel-gallery-block__image {
-	min-width: 0;
-	flex: 0 0 auto;
-	
-	& img {
-		display: block;
-		width: 100%;
-		height: auto;
-		object-fit: cover;
-	}
+.wp-block-hamworks-carousel-gallery-block__image img {
+	display: block;
+	width: 100%;
+	height: auto;
+	object-fit: cover;
 }
 
 /* CSS for proper slide widths when using KeenSlider with perView: 1.5 */
