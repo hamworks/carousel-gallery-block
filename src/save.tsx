@@ -3,6 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockSaveProps } from '@wordpress/blocks';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,14 +14,23 @@ import Images from './Images';
 export default function Save( props: BlockSaveProps< BlockAttributes > ) {
 	const { attributes } = props;
 	const { images, speed, direction } = attributes;
+
+	const blockProps = useBlockProps.save( {
+		'data-speed': speed,
+		'data-direction': direction,
+		role: 'region',
+		'aria-label': sprintf(
+			/* translators: %d: number of images in the carousel gallery */
+			__(
+				'Image carousel gallery with %d images',
+				'carousel-gallery-block'
+			),
+			images.length
+		),
+	} );
+
 	return (
-		<div
-			{ ...useBlockProps.save() }
-			data-speed={ speed }
-			data-direction={ direction }
-			role="region"
-			aria-label={ `Image carousel gallery with ${ images.length } images` }
-		>
+		<div { ...blockProps }>
 			<Images images={ images } />
 		</div>
 	);
