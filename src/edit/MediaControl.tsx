@@ -66,7 +66,7 @@ const MediaControl = ( { onSelect, onRemove, media }: MediaControlProps ) => {
 					<Button
 						className={
 							media?.url
-								? 'flex justify-center overflow-hidden p-0 w-full h-auto'
+								? 'flex justify-center overflow-hidden p-0 w-full !h-auto'
 								: 'rounded-tl min-h-[90px] px-2 text-center bg-[#f0f0f0] justify-center w-full'
 						}
 						onClick={ open }
@@ -78,10 +78,13 @@ const MediaControl = ( { onSelect, onRemove, media }: MediaControlProps ) => {
 						{ isLoading && <Spinner /> }
 					</Button>
 					{ media?.url ? (
-						<Flex className="absolute transition-opacity duration-[50ms] ease-[ease-out] p-2 bottom-0 opacity-0 hover:opacity-100">
+						<Flex
+							align="flex-end"
+							className="absolute transition-opacity duration-[50ms] ease-[ease-out] p-2 bottom-0 opacity-0 hover:opacity-100 h-full"
+						>
 							<FlexBlock>
 								<Button
-									className="backdrop-blur-lg backdrop-saturate-[180%] grow justify-center bg-[hsla(0,0%,100%,.75)] w-full"
+									className="backdrop-blur-lg backdrop-saturate-[180%] grow justify-center !bg-[hsla(0,0%,100%,.75)] w-full"
 									onClick={ open }
 									aria-hidden="true"
 								>
@@ -92,7 +95,7 @@ const MediaControl = ( { onSelect, onRemove, media }: MediaControlProps ) => {
 							</FlexBlock>
 							<FlexBlock>
 								<Button
-									className="backdrop-blur-lg backdrop-saturate-[180%] grow justify-center bg-[hsla(0,0%,100%,.75)] w-full"
+									className="backdrop-blur-lg backdrop-saturate-[180%] grow justify-center !bg-[hsla(0,0%,100%,.75)] w-full"
 									onClick={ onRemove }
 								>
 									{ __( 'Remove' ) }

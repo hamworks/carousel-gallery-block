@@ -3,8 +3,14 @@
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
-import { PanelBody, RangeControl, ToggleControl } from '@wordpress/components';
+import {
+	PanelBody,
+	Placeholder,
+	RangeControl,
+	ToggleControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { gallery } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -63,7 +69,21 @@ export default function Edit( props: EditProps ): JSX.Element {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<Images images={ images } />
+			{ images.length > 0 ? (
+				<Images images={ images } />
+			) : (
+				<Placeholder
+					icon={ gallery }
+					label={ __(
+						'Carousel Gallery Block',
+						'carousel-gallery-block'
+					) }
+					instructions={ __(
+						'Add images to your carousel gallery',
+						'carousel-gallery-block'
+					) }
+				/>
+			) }
 		</div>
 	);
 }
