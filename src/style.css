@@ -15,9 +15,3 @@
 	height: auto;
 	object-fit: cover;
 }
-
-/* CSS for proper slide widths when using KeenSlider with perView: 1.5 */
-.keen-slider__slide.wp-block-hamworks-carousel-gallery-block__image {
-	width: 100%;
-	flex: 0 0 auto;
-}

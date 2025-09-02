@@ -28,7 +28,7 @@ export const getEagerImageCount = (): number => {
 	} else if ( width < 782 ) {
 		return 2; // Tablet (Gutenberg $break-small: 782px)
 	}
-	return 3; // Desktop (Gutenberg $break-wide: 1080px+)
+	return 3; // Desktop (≥ 782px)
 };
 
 /**

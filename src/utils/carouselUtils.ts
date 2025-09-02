@@ -66,6 +66,13 @@ export const duplicateSlides = (
 		for ( let i = 0; i < duplicationsNeeded; i++ ) {
 			images.forEach( ( originalImage ) => {
 				const clone = originalImage.cloneNode( true ) as HTMLElement;
+				// Remove duplicated id attributes in the clone subtree
+				if ( clone.hasAttribute( 'id' ) ) {
+					clone.removeAttribute( 'id' );
+				}
+				clone
+					.querySelectorAll( '[id]' )
+					.forEach( ( el ) => el.removeAttribute( 'id' ) );
 
 				// Add a class to identify duplicated slides for potential cleanup
 				clone.classList.add( 'carousel-duplicated-slide' );
