@@ -30,3 +30,26 @@ export const getEagerImageCount = (): number => {
 	}
 	return 3; // Desktop (Gutenberg $break-wide: 1080px+)
 };
+
+/**
+ * @description Determines perView value for KeenSlider based on window width
+ * Uses the same breakpoints as eager loading with +0.5 for preview effect
+ * @return Number of slides to show with half preview
+ * - Mobile (< 600px): 1.5 slides
+ * - Tablet (600px - 781px): 2.5 slides
+ * - Desktop (≥ 782px): 3.5 slides
+ * - SSR environment: 2.5 slides (default)
+ * @example
+ * ```typescript
+ * // Browser environment usage
+ * const perView = getCarouselPerView(); // 1.5, 2.5, or 3.5
+ *
+ * // SSR environment always returns 2.5
+ * delete window; // SSR simulation
+ * const defaultPerView = getCarouselPerView(); // 2.5
+ * ```
+ */
+export const getCarouselPerView = (): number => {
+	const eagerCount = getEagerImageCount();
+	return eagerCount + 0.5; // Always show half of the next slide for preview
+};
