@@ -154,18 +154,21 @@ describe( 'carouselUtils', () => {
 		it( 'should handle DOM errors gracefully', () => {
 			// Mock cloneNode to throw an error
 			const originalCloneNode = Element.prototype.cloneNode;
-			Element.prototype.cloneNode = vi.fn( () => {
-				throw new Error( 'Clone failed' );
-			} );
 
-			const result = duplicateSlides( mockContainer, 2.5 );
+			try {
+				Element.prototype.cloneNode = vi.fn( () => {
+					throw new Error( 'Clone failed' );
+				} );
 
-			expect( result.success ).toBe( false );
-			expect( result.duplicatedCount ).toBe( 0 );
-			expect( result.error ).toBe( 'Clone failed' );
+				const result = duplicateSlides( mockContainer, 2.5 );
 
-			// Restore original method
-			Element.prototype.cloneNode = originalCloneNode;
+				expect( result.success ).toBe( false );
+				expect( result.duplicatedCount ).toBe( 0 );
+				expect( result.error ).toBe( 'Clone failed' );
+			} finally {
+				// Restore original method - this will always execute
+				Element.prototype.cloneNode = originalCloneNode;
+			}
 		} );
 
 		it( 'should calculate correct duplication for different perView values', () => {
