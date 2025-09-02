@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import type { BlockEditProps } from '@wordpress/blocks';
+import type { BlockSaveProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -10,11 +10,17 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import type { BlockAttributes } from './types';
 import Images from './Images';
 
-export default function Save( props: BlockEditProps< BlockAttributes > ) {
+export default function Save( props: BlockSaveProps< BlockAttributes > ) {
 	const { attributes } = props;
-	const { images, speed } = attributes;
+	const { images, speed, direction } = attributes;
 	return (
-		<div { ...useBlockProps.save( {} ) } data-speed={ speed }>
+		<div
+			{ ...useBlockProps.save() }
+			data-speed={ speed }
+			data-direction={ direction }
+			role="region"
+			aria-label={ `Image carousel gallery with ${ images.length } images` }
+		>
 			<Images images={ images } />
 		</div>
 	);
