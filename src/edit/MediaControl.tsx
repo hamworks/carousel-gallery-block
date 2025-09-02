@@ -80,13 +80,12 @@ const MediaControl = ( { onSelect, onRemove, media }: MediaControlProps ) => {
 					{ media?.url ? (
 						<Flex
 							align="flex-end"
-							className="absolute transition-opacity duration-[50ms] ease-[ease-out] p-2 bottom-0 opacity-0 hover:opacity-100 h-full"
+							className="absolute inset-0 p-2 h-full transition-opacity duration-[50ms] ease-[ease-out] opacity-0 hover:opacity-100 focus-within:opacity-100"
 						>
 							<FlexBlock>
 								<Button
 									className="backdrop-blur-lg backdrop-saturate-[180%] grow justify-center !bg-[hsla(0,0%,100%,.75)] w-full"
 									onClick={ open }
-									aria-hidden="true"
 								>
 									{ !! media?.url
 										? __( 'Replace' )
