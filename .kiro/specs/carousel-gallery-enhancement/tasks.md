@@ -97,7 +97,7 @@
   - 純粋関数のみVitestで検証
   - _要件: 1.5, 2.5, 2.6_
 
-- [ ] 4.1 保存コンポーネントの実装
+- [x] 4.1 保存コンポーネントの実装
   - `src/save.tsx`でBlockSaveProps型を使用した型安全な実装
   - data-speed, data-direction属性をHTML出力に追加
   - useBlockProps.save()を使用した適切なブロック保存
