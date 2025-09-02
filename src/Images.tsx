@@ -8,15 +8,21 @@ const Images = ( { images }: Props ) => (
 	<div className="wp-block-hamworks-carousel-gallery-block__images">
 		{ images.map( ( image, index ) => (
 			<div
-				key={ image.id ?? `temp-${ Date.now() }-${ index }` }
+				key={ image.id ?? `${ image.url }-${ index }` }
 				className="wp-block-hamworks-carousel-gallery-block__image"
 			>
 				{ image.url && (
 					<img
 						src={ image.url }
-						data-id={ image.id || 0 }
-						alt={ image.alt ?? `Image ${ index + 1 }` }
+						{ ...( image.id !== undefined
+							? { 'data-id': image.id }
+							: {} ) }
+						alt={ image.alt ?? '' }
 						loading={ index < 3 ? 'eager' : 'lazy' }
+						decoding="async"
+						{ ...( index === 0
+							? { fetchPriority: 'high' as const }
+							: {} ) }
 					/>
 				) }
 			</div>
