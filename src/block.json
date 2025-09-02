@@ -41,6 +41,12 @@
 					"type": "string",
 					"source": "attribute",
 					"attribute": "src"
+				},
+				"alt": {
+					"type": "string",
+					"source": "attribute",
+					"attribute": "alt",
+					"default": ""
 				}
 			},
 			"default": []

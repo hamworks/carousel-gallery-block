@@ -22,7 +22,8 @@ carousel-gallery-block/
 │   ├── view.ts                 # フロントエンド動作（拡張）
 │   └── utils/                  # 新規追加
 │       ├── imageOrderUtils.ts  # 画像順序管理ユーティリティ
-│       └── carouselUtils.ts    # カルーセル制御ユーティリティ
+│       ├── carouselUtils.ts    # カルーセル制御ユーティリティ
+│       └── loadingUtils.ts     # 画像遅延読み込み制御
 └── tests/                      # 新規追加
     ├── e2e/
     ├── unit/
@@ -50,11 +51,8 @@ export type WpMedia = { id: number; url: string; alt?: string; caption?: string 
 // 既存のBlockAttributesを拡張
 export interface BlockAttributes {
   images: Image[];
-  breakpoint: number;
   speed: number;
   direction: 'ltr' | 'rtl'; // 新規追加
-  allowedBlocks: string[];
-  templateLock?: 'all' | 'insert' | 'contentOnly' | false;
 }
 
 // WpMediaを基にした画像型
@@ -104,6 +102,12 @@ export interface ImageOrderResult {
           "type": "string",
           "source": "attribute",
           "attribute": "src"
+        },
+        "alt": {
+          "type": "string",
+          "source": "attribute",
+          "attribute": "alt",
+          "default": ""
         }
       },
       "default": []
@@ -170,8 +174,8 @@ import { __ } from '@wordpress/i18n';
 import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
 import { Button, BaseControl } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
-import type { BlockAttributes, Image, ImageOrderAction } from '../types';
-import { moveImageInArray, replaceImageAtIndex, removeImageAtIndex } from '../utils/imageOrderUtils';
+import type { BlockAttributes, Image, ImageOrderAction, WpMedia } from '../types';
+import { moveImageInArray, replaceImageAtIndex, removeImageAtIndex, addImageToArray } from '../utils/imageOrderUtils';
 
 interface Props {
   images: Image[];
@@ -274,6 +278,7 @@ export default ImagesControls;
 ```typescript
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockSaveProps } from '@wordpress/blocks';
+import { _n, sprintf } from '@wordpress/i18n';
 import type { BlockAttributes } from './types';
 import Images from './Images';
 
@@ -281,12 +286,23 @@ export default function Save( props: BlockSaveProps< BlockAttributes > ) {
   const { attributes } = props;
   const { images, speed, direction } = attributes;
 
+  const blockProps = useBlockProps.save( {
+    'data-speed': speed,
+    'data-direction': direction,
+    role: 'region',
+    'aria-label': sprintf(
+      _n(
+        'Image carousel gallery with %d image',
+        'Image carousel gallery with %d images',
+        images.length,
+        'carousel-gallery-block'
+      ),
+      images.length
+    ),
+  } );
+
   return (
-    <div
-      { ...useBlockProps.save() }
-      data-speed={ speed }
-      data-direction={ direction }
-    >
+    <div { ...blockProps }>
       <Images images={ images } />
     </div>
   );
@@ -375,6 +391,34 @@ export const removeImageAtIndex = ( images: Image[], index: number ): Image[] =>
 
 export const addImageToArray = ( images: Image[], newImage: Image ): Image[] => {
   return [...images, newImage];
+};
+```
+
+### 5. パフォーマンス最適化ユーティリティ (utils/loadingUtils.ts)
+
+```typescript
+/**
+ * @description Determines the number of images for eager loading based on window width
+ * Uses official Gutenberg breakpoints for responsive behavior
+ * @return Number of images to load eagerly
+ * - Mobile (< 600px): 1 image
+ * - Tablet (600px - 781px): 2 images
+ * - Desktop (≥ 782px): 3 images
+ * - SSR environment: 2 images (default)
+ */
+export const getEagerImageCount = (): number => {
+  if ( typeof window === 'undefined' ) {
+    return 2; // Default value for SSR environment
+  }
+
+  const width = window.innerWidth;
+
+  if ( width < 600 ) {
+    return 1; // Mobile (Gutenberg $break-mobile: 600px)
+  } else if ( width < 782 ) {
+    return 2; // Tablet (Gutenberg $break-small: 782px)
+  }
+  return 3; // Desktop (Gutenberg $break-wide: 1080px+)
 };
 ```
 
@@ -492,8 +536,6 @@ describe( 'Block Attributes Integration', () => {
       direction: 'ltr',
       images: [],
       speed: 1,
-      breakpoint: 768,
-      allowedBlocks: [],
     };
 
     const props: BlockEditProps< BlockAttributes > = {
@@ -580,6 +622,48 @@ const strings = {
   mediaSettings: __( 'Media settings', 'carousel-gallery-block' ),
   add: __( 'Add', 'carousel-gallery-block' ),
 };
+
+// 実用的な使用例（save.tsx内での実装）
+export default function Save( props: BlockSaveProps< BlockAttributes > ) {
+  const { attributes } = props;
+  const { images, speed, direction } = attributes;
+
+  const ariaLabel = sprintf(
+    _n(
+      'Image carousel gallery with %d image',
+      'Image carousel gallery with %d images',
+      images.length,
+      'carousel-gallery-block'
+    ),
+    images.length
+  );
+
+  const blockProps = useBlockProps.save( {
+    'data-speed': speed,
+    'data-direction': direction,
+    role: 'region',
+    'aria-label': ariaLabel,
+  } );
+
+  return (
+    <div { ...blockProps }>
+      <Images images={ images } />
+    </div>
+  );
+}
+
+// 汎用ユーティリティ関数（再利用可能）
+export const generateCarouselAriaLabel = ( imageCount: number ): string => {
+  return sprintf(
+    _n(
+      'Image carousel gallery with %d image',
+      'Image carousel gallery with %d images',
+      imageCount,
+      'carousel-gallery-block'
+    ),
+    imageCount
+  );
+};
 ```
 
 ### POTファイル生成
@@ -597,6 +681,10 @@ const strings = {
 
 - KeenSliderの設定を最適化し、不要な再描画を避ける
 - 画像の遅延読み込み対応（既存機能の維持）
+- レスポンシブ対応した画像読み込み最適化：
+  - Gutenberg公式ブレイクポイントに基づいた画像数制御
+  - モバイル: 1枚、タブレット: 2枚、デスクトップ: 3枚の即座読み込み
+  - SSR環境での適切なフォールバック（デフォルト2枚）
 
 ### 3. メモリ使用量
 

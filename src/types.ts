@@ -24,14 +24,12 @@ export type WpMedia = {
 
 /**
  * @description Block attributes for the carousel gallery
+ * Must match the attributes defined in block.json
  */
 export type BlockAttributes = {
 	images: Image[];
-	breakpoint: number;
 	speed: number;
-	direction: 'ltr' | 'rtl'; // New attribute for carousel direction
-	allowedBlocks: string[];
-	templateLock?: 'all' | 'insert' | 'contentOnly' | false;
+	direction: 'ltr' | 'rtl';
 };
 
 export type ImageProps = {
